@@ -26,7 +26,7 @@ from util import robot_kinematics
 DT = 0.01
 
 PRINT_ROBOT_INFO = False
-VIDEO_RECORD = True
+VIDEO_RECORD = False
 RECORD_FREQ = 1
 
 INITIAL_POS_WORLD_TO_BASEJOINT = [0, 0, 1.5 - 0.761]
