@@ -1,4 +1,8 @@
 import numpy as np
+import os
+import sys
+cwd = os.getcwd()
+sys.path.append(cwd)
 
 
 class SimConfig(object):
@@ -26,6 +30,8 @@ class PnCConfig(object):
     SAVE_FREQ = 1
 
     PRINT_ROBOT_INFO = SimConfig.PRINT_ROBOT_INFO
+
+    TOWR_PLUS = True
 
 
 class WBCConfig(object):
@@ -120,3 +126,7 @@ class WalkingState(object):
     LF_SWING = 7
     RH_HANDREACH = 8
     LH_HANDREACH = 9
+
+class TowrPlusConfig(object):
+    SOLUTION_YAML = cwd + "/data/atlas_forward_walk.yaml"
+

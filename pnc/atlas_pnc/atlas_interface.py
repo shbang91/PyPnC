@@ -14,6 +14,7 @@ from pnc.atlas_pnc.atlas_interrupt_logic import AtlasInterruptLogic
 from pnc.atlas_pnc.atlas_state_provider import AtlasStateProvider
 from pnc.atlas_pnc.atlas_state_estimator import AtlasStateEstimator
 from pnc.atlas_pnc.atlas_control_architecture import AtlasControlArchitecture
+from pnc.atlas_pnc.atlas_towr_plus_control_architecture import AtlasTowrPlusControlArchitecture
 from pnc.data_saver import DataSaver
 
 
@@ -36,7 +37,10 @@ class AtlasInterface(Interface):
 
         self._sp = AtlasStateProvider(self._robot)
         self._se = AtlasStateEstimator(self._robot)
-        self._control_architecture = AtlasControlArchitecture(self._robot)
+        if (PnCConfig.TOWR_PLUS):
+            self._control_architecture = AtlasTowrPlusControlArchitecture(self._robot)
+        else:
+            self._control_architecture = AtlasControlArchitecture(self._robot)
         self._interrupt_logic = AtlasInterruptLogic(self._control_architecture)
         if PnCConfig.SAVE_DATA:
             self._data_saver = DataSaver()
@@ -69,6 +73,7 @@ class AtlasInterface(Interface):
         self._sp.curr_time = self._running_time
         self._sp.prev_state = self._control_architecture.prev_state
         self._sp.state = self._control_architecture.state
+        self._sp.count = self._count
 
         return copy.deepcopy(command)
 
