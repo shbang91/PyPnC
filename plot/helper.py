@@ -14,8 +14,8 @@ facecolors = [
 ] * 10
 
 
-def plot_task(time, pos_des, pos, vel_des, vel, phase, suptitle):
-    if pos_des.shape[1] == 3:
+def plot_task(time, pos_des, pos, vel_des, vel, phase, suptitle, label=None):
+    if pos_des.shape[1] == 3 and label is None:
 
         fig, axes = plt.subplots(3, 2)
         for i in range(3):
@@ -41,7 +41,7 @@ def plot_task(time, pos_des, pos, vel_des, vel, phase, suptitle):
         axes[2, 1].set_xlabel('time')
         fig.suptitle(suptitle)
 
-    elif pos_des.shape[1] == 4:
+    elif pos_des.shape[1] == 4 and label is None:
         fig, axes = plt.subplots(4, 2)
         for i in range(4):
             axes[i, 0].plot(time,
@@ -67,7 +67,7 @@ def plot_task(time, pos_des, pos, vel_des, vel, phase, suptitle):
         axes[3, 1].set_xlabel('time')
         fig.suptitle(suptitle)
 
-    elif pos_des.shape[1] == 1:
+    elif pos_des.shape[1] == 1 and label is None:
         dim = pos_des.shape[1]
         fig, axes = plt.subplots(dim, 2)
         axes[0].plot(time, pos_des, color='r', linestyle='dashed', linewidth=4)
@@ -94,6 +94,8 @@ def plot_task(time, pos_des, pos, vel_des, vel, phase, suptitle):
             axes[i, 0].plot(time, pos[:, i], color='b', linewidth=2)
             plot_phase(axes[i, 0], time, phase)
             axes[i, 0].grid(True)
+            if label is not None:
+                axes[i, 0].set_ylabel(label[i])
             axes[i, 1].plot(time,
                             vel_des[:, i],
                             color='r',
@@ -139,14 +141,27 @@ def plot_rf_z_max(time, rf_z_max, phase):
     fig.suptitle('rf_z_max')
 
 
-def plot_vector_traj(time, vector, suptitle):
+def plot_vector_traj(time,
+                     vector,
+                     phase,
+                     label,
+                     color,
+                     suptitle=None,
+                     axes=None):
     dim = vector.shape[1]
-    fig, axes = plt.subplots(dim, 1)
+    if axes is None:
+        fig, axes = plt.subplots(dim, 1)
     for i in range(dim):
-        axes[i].plot(time, vector[:, i], color='k', linewidth=3)
+        axes[i].plot(time, vector[:, i], color=color, linewidth=3)
         axes[i].grid(True)
+        if label is not None:
+            axes[i].set_ylabel(label[i])
+        if phase is not None:
+            plot_phase(axes[i], time, phase)
     axes[dim - 1].set_xlabel('time')
-    fig.suptitle(suptitle)
+    if suptitle is not None:
+        fig.suptitle(suptitle)
+    return axes
 
 
 def plot_rf(time, rfs, phase):
@@ -214,3 +229,16 @@ def plot_phase(ax, t, data_phse):
                     ul,
                     facecolor=facecolors[data_phse[prev_j]],
                     alpha=shading)
+
+
+def plot_joints(full_joint, selected_joint, time, cmd_joint_positions,
+                joint_positions, cmd_joint_velocities, joint_velocities,
+                cmd_joint_torques, phase, title):
+    idx_list = []
+    for name in selected_joint:
+        idx_list.append(full_joint.index(name))
+    plot_task(time, cmd_joint_positions[:, idx_list],
+              joint_positions[:, idx_list], cmd_joint_velocities[:, idx_list],
+              joint_velocities[:, idx_list], phase, title, selected_joint)
+    plot_vector_traj(time, cmd_joint_torques[:, idx_list], phase,
+                     selected_joint, 'k', title + " torque command")
