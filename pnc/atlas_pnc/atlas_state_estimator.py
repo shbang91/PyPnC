@@ -1,8 +1,11 @@
 import numpy as np
+import copy
 
 from config.atlas_config import PnCConfig
 from util import util
 from pnc.atlas_pnc.atlas_state_provider import AtlasStateProvider
+
+from pnc.data_saver import DataSaver
 
 
 class AtlasStateEstimator(object):
@@ -10,6 +13,7 @@ class AtlasStateEstimator(object):
         super(AtlasStateEstimator, self).__init__()
         self._robot = robot
         self._sp = AtlasStateProvider(self._robot)
+        self._data_saver = DataSaver()
 
     def initialize(self, sensor_data):
         self._sp.nominal_joint_pos = sensor_data["joint_pos"]
@@ -31,6 +35,13 @@ class AtlasStateEstimator(object):
 
         # Update Divergent Component of Motion
         self._update_dcm()
+
+        ## save data
+        if PnCConfig.SAVE_DATA and (self._sp.count % PnCConfig.SAVE_FREQ == 0):
+            self._data_saver.add('joint_pos_act',
+                                 copy.deepcopy(sensor_data['joint_pos']))
+            self._data_saver.add('joint_vel_act',
+                                 copy.deepcopy(sensor_data['joint_vel']))
 
     def _update_dcm(self):
         com_pos = self._robot.get_com_pos()

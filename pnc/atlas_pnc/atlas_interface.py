@@ -38,7 +38,8 @@ class AtlasInterface(Interface):
         self._sp = AtlasStateProvider(self._robot)
         self._se = AtlasStateEstimator(self._robot)
         if (PnCConfig.TOWR_PLUS):
-            self._control_architecture = AtlasTowrPlusControlArchitecture(self._robot)
+            self._control_architecture = AtlasTowrPlusControlArchitecture(
+                self._robot)
         else:
             self._control_architecture = AtlasControlArchitecture(self._robot)
         self._interrupt_logic = AtlasInterruptLogic(self._control_architecture)
@@ -46,10 +47,6 @@ class AtlasInterface(Interface):
             self._data_saver = DataSaver()
 
     def get_command(self, sensor_data):
-        if PnCConfig.SAVE_DATA:
-            self._data_saver.add('time', self._running_time)
-            self._data_saver.add('phase', self._control_architecture.state)
-
         # Update State Estimator
         if self._count == 0:
             print("=" * 80)
@@ -65,6 +62,8 @@ class AtlasInterface(Interface):
         command = self._control_architecture.get_command()
 
         if PnCConfig.SAVE_DATA and (self._count % PnCConfig.SAVE_FREQ == 0):
+            self._data_saver.add('time', self._running_time)
+            self._data_saver.add('phase', self._control_architecture.state)
             self._data_saver.advance()
 
         # Increase time variables
