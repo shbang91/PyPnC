@@ -14,6 +14,7 @@ from pnc.atlas_pnc.atlas_state_machine.double_support_stand import DoubleSupport
 from pnc.atlas_pnc.atlas_state_machine.double_support_balance import DoubleSupportBalance
 from pnc.atlas_pnc.atlas_state_provider import AtlasStateProvider
 
+
 class AtlasTowrPlusControlArchitecture(ControlArchitecture):
     def __init__(self, robot):
         super().__init__(robot)
@@ -25,7 +26,8 @@ class AtlasTowrPlusControlArchitecture(ControlArchitecture):
         self._atlas_controller = AtlasController(self._tci_container, robot)
 
         # Initalize Task Manager
-        self._towr_plus_trajectory_manager = TowrPlusTrajectoryManager(robot, self._tci_container, TowrPlusConfig.SOLUTION_YAML)
+        self._towr_plus_trajectory_manager = TowrPlusTrajectoryManager(
+            robot, self._tci_container, TowrPlusConfig.SOLUTION_YAML)
 
         self._rfoot_tm = FootTrajectoryManager(
             self._tci_container.rfoot_pos_task,
@@ -47,7 +49,6 @@ class AtlasTowrPlusControlArchitecture(ControlArchitecture):
             "upper_body": self._upper_body_tm,
             "floating_base": self._floating_base_tm,
         }
-
 
         # Initialize Hierarchy Manager
         self._rfoot_pos_hm = TaskHierarchyManager(
@@ -106,8 +107,8 @@ class AtlasTowrPlusControlArchitecture(ControlArchitecture):
     def get_command(self):
         if (self._sp.count < 500):
             if self._b_state_first_visit:
-                    self._state_machine[self._state].first_visit()
-                    self._b_state_first_visit = False
+                self._state_machine[self._state].first_visit()
+                self._b_state_first_visit = False
 
             # Update State Machine
             self._state_machine[self._state].one_step()
@@ -121,10 +122,18 @@ class AtlasTowrPlusControlArchitecture(ControlArchitecture):
                 self._state = self._state_machine[self._state].get_next_state()
                 self._b_state_first_visit = True
         else:
+            ## upper body motion
+            self._upper_body_tm.use_nominal_upper_body_joint_pos(
+                self._sp.nominal_joint_pos)
+
+            ## reaction wrench weight scheduling
+
+            ## foot task hierarchy scheduling
+
+            ## update desired motion & force trajectories
             self._towr_plus_trajectory_manager.update_desired()
 
         # Get Whole Body Control Commands
         command = self._atlas_controller.get_command()
 
         return command
-
