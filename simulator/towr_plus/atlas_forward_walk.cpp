@@ -39,9 +39,9 @@ int main() {
   for (auto c : formulation.GetConstraints(solution)) {
     nlp.AddConstraintSet(c);
   }
-  // for (auto c : formulation.GetCosts()) {
-  // nlp.AddCostSet(c);
-  //}
+  for (auto c : formulation.GetCosts()) {
+    nlp.AddCostSet(c);
+  }
 
   // Eigen::VectorXd initial_vars = nlp.GetVariableValues();
   // sol.from_one_hot_vector(initial_vars);
