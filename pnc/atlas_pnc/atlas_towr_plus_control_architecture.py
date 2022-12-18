@@ -25,10 +25,6 @@ class AtlasTowrPlusControlArchitecture(ControlArchitecture):
         # Initialize Controller
         self._atlas_controller = AtlasController(self._tci_container, robot)
 
-        # Initalize Task Manager
-        self._towr_plus_trajectory_manager = TowrPlusTrajectoryManager(
-            robot, self._tci_container, TowrPlusConfig.SOLUTION_YAML)
-
         self._rfoot_tm = FootTrajectoryManager(
             self._tci_container.rfoot_pos_task,
             self._tci_container.rfoot_ori_task, robot)
@@ -81,6 +77,11 @@ class AtlasTowrPlusControlArchitecture(ControlArchitecture):
             "lfoot": self._lfoot_fm
         }
 
+        # Initalize Task Manager
+        self._towr_plus_trajectory_manager = TowrPlusTrajectoryManager(
+            robot, self._tci_container, self._reaction_force_managers,
+            self._hierarchy_managers, TowrPlusConfig.SOLUTION_YAML)
+
         # Initialize State Machines
         self._state_machine[WalkingState.STAND] = DoubleSupportStand(
             WalkingState.STAND, self._trajectory_managers,
@@ -125,10 +126,6 @@ class AtlasTowrPlusControlArchitecture(ControlArchitecture):
             ## upper body motion
             self._upper_body_tm.use_nominal_upper_body_joint_pos(
                 self._sp.nominal_joint_pos)
-
-            ## reaction wrench weight scheduling
-
-            ## foot task hierarchy scheduling
 
             ## update desired motion & force trajectories
             self._towr_plus_trajectory_manager.update_desired()
