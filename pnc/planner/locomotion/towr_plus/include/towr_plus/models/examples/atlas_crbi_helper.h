@@ -12,8 +12,7 @@ extern "C" {
 #define casadi_int long long int
 #endif
 
-int atlas_crbi_helper(const casadi_real **arg, casadi_real **res,
-                      casadi_int *iw, casadi_real *w, int mem);
+int atlas_crbi_helper(const casadi_real** arg, casadi_real** res, casadi_int* iw, casadi_real* w, int mem);
 int atlas_crbi_helper_alloc_mem(void);
 int atlas_crbi_helper_init_mem(int mem);
 void atlas_crbi_helper_free_mem(int mem);
@@ -24,14 +23,12 @@ void atlas_crbi_helper_decref(void);
 casadi_int atlas_crbi_helper_n_out(void);
 casadi_int atlas_crbi_helper_n_in(void);
 casadi_real atlas_crbi_helper_default_in(casadi_int i);
-const char *atlas_crbi_helper_name_in(casadi_int i);
-const char *atlas_crbi_helper_name_out(casadi_int i);
-const casadi_int *atlas_crbi_helper_sparsity_in(casadi_int i);
-const casadi_int *atlas_crbi_helper_sparsity_out(casadi_int i);
-int atlas_crbi_helper_work(casadi_int *sz_arg, casadi_int *sz_res,
-                           casadi_int *sz_iw, casadi_int *sz_w);
-int jac_atlas_crbi_helper(const casadi_real **arg, casadi_real **res,
-                          casadi_int *iw, casadi_real *w, int mem);
+const char* atlas_crbi_helper_name_in(casadi_int i);
+const char* atlas_crbi_helper_name_out(casadi_int i);
+const casadi_int* atlas_crbi_helper_sparsity_in(casadi_int i);
+const casadi_int* atlas_crbi_helper_sparsity_out(casadi_int i);
+int atlas_crbi_helper_work(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
+int jac_atlas_crbi_helper(const casadi_real** arg, casadi_real** res, casadi_int* iw, casadi_real* w, int mem);
 int jac_atlas_crbi_helper_alloc_mem(void);
 int jac_atlas_crbi_helper_init_mem(int mem);
 void jac_atlas_crbi_helper_free_mem(int mem);
@@ -42,12 +39,11 @@ void jac_atlas_crbi_helper_decref(void);
 casadi_int jac_atlas_crbi_helper_n_out(void);
 casadi_int jac_atlas_crbi_helper_n_in(void);
 casadi_real jac_atlas_crbi_helper_default_in(casadi_int i);
-const char *jac_atlas_crbi_helper_name_in(casadi_int i);
-const char *jac_atlas_crbi_helper_name_out(casadi_int i);
-const casadi_int *jac_atlas_crbi_helper_sparsity_in(casadi_int i);
-const casadi_int *jac_atlas_crbi_helper_sparsity_out(casadi_int i);
-int jac_atlas_crbi_helper_work(casadi_int *sz_arg, casadi_int *sz_res,
-                               casadi_int *sz_iw, casadi_int *sz_w);
+const char* jac_atlas_crbi_helper_name_in(casadi_int i);
+const char* jac_atlas_crbi_helper_name_out(casadi_int i);
+const casadi_int* jac_atlas_crbi_helper_sparsity_in(casadi_int i);
+const casadi_int* jac_atlas_crbi_helper_sparsity_out(casadi_int i);
+int jac_atlas_crbi_helper_work(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
