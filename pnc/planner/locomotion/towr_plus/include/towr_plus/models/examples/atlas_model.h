@@ -12,7 +12,8 @@ public:
   AtlasKinematicModel() : KinematicModel(2) {
     const double x_nominal_b = -0.008;
     const double y_nominal_b = 0.111;
-    const double z_nominal_b = -0.765;
+    // const double z_nominal_b = -0.765;
+    const double z_nominal_b = -1.02;
 
     foot_half_length_ = 0.11;
     foot_half_width_ = 0.065;
