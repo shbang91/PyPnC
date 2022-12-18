@@ -1,9 +1,12 @@
 import numpy as np
+import copy
 
 from util import util
 from config.atlas_config import PnCConfig, WBCConfig
 from pnc.wbc.ihwbc.ihwbc import IHWBC
 from pnc.wbc.ihwbc.joint_integrator import JointIntegrator
+from pnc.data_saver import DataSaver
+from pnc.atlas_pnc.atlas_state_provider import AtlasStateProvider
 
 
 class AtlasController(object):
@@ -48,6 +51,11 @@ class AtlasController(object):
 
         self._b_first_visit = True
 
+        self._sp = AtlasStateProvider()
+
+        if PnCConfig.SAVE_DATA:
+            self._data_saver = DataSaver()
+
     def get_command(self):
 
         if self._b_first_visit:
@@ -83,6 +91,15 @@ class AtlasController(object):
         command = self._robot.create_cmd_ordered_dict(joint_pos_cmd,
                                                       joint_vel_cmd,
                                                       joint_trq_cmd)
+        ## save wbc data
+        if PnCConfig.SAVE_DATA and (self._sp.count % PnCConfig.SAVE_FREQ == 0):
+            self._data_saver.add('joint_pos_des',
+                                 copy.deepcopy(command['joint_pos']))
+            self._data_saver.add('joint_vel_des',
+                                 copy.deepcopy(command['joint_vel']))
+            self._data_saver.add('joint_trq_des',
+                                 copy.deepcopy(command['joint_trq']))
+
         return command
 
     def first_visit(self):

@@ -1,4 +1,8 @@
 import numpy as np
+import os
+import sys
+cwd = os.getcwd()
+sys.path.append(cwd)
 
 
 class SimConfig(object):
@@ -27,6 +31,8 @@ class PnCConfig(object):
 
     PRINT_ROBOT_INFO = SimConfig.PRINT_ROBOT_INFO
 
+    TOWR_PLUS = True
+
 
 class WBCConfig(object):
     VERBOSE = False
@@ -45,7 +51,7 @@ class WBCConfig(object):
 
     # Task Gains
     KP_COM = np.array([100., 100., 100])
-    KD_COM = np.array([10., 10., 10.])
+    KD_COM = np.array([20., 20., 20.])
 
     KP_PELVIS = np.array([100., 100., 100])
     KD_PELVIS = np.array([10., 10., 10.])
@@ -79,6 +85,8 @@ class WalkingConfig(object):
     RF_Z_MAX_TIME = 0.1
 
     COM_HEIGHT = 1.02  # m
+    # COM_HEIGHT = 0.9  # m
+    # COM_HEIGHT = 0.766  # m
     SWING_HEIGHT = 0.05  # m
 
     T_ADDITIONAL_INI_TRANS = 0.  # sec
@@ -120,3 +128,7 @@ class WalkingState(object):
     LF_SWING = 7
     RH_HANDREACH = 8
     LH_HANDREACH = 9
+
+
+class TowrPlusConfig(object):
+    SOLUTION_YAML = cwd + "/data/atlas_forward_walk.yaml"

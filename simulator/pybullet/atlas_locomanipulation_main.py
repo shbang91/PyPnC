@@ -62,10 +62,10 @@ if __name__ == "__main__":
     # cameraPitch=-30,
     # cameraTargetPosition=[1., 0.5, 1.5])
 
-    p.resetDebugVisualizerCamera(cameraDistance=3.0,
-                                 cameraYaw=60,
-                                 cameraPitch=-20,
-                                 cameraTargetPosition=[0., 0., 1.])
+    p.resetDebugVisualizerCamera(cameraDistance=2.0,
+                                 cameraYaw=180 + 30,
+                                 cameraPitch=-10,
+                                 cameraTargetPosition=[0.5, 0.5, 1.])
     p.setGravity(0, 0, -9.8)
     p.setPhysicsEngineParameter(fixedTimeStep=SimConfig.CONTROLLER_DT,
                                 numSubSteps=SimConfig.N_SUBSTEP)
@@ -86,6 +86,22 @@ if __name__ == "__main__":
     nq, nv, na, joint_id, link_id, pos_basejoint_to_basecom, rot_basejoint_to_basecom = pybullet_util.get_robot_config(
         robot, SimConfig.INITIAL_POS_WORLD_TO_BASEJOINT,
         SimConfig.INITIAL_QUAT_WORLD_TO_BASEJOINT, SimConfig.PRINT_ROBOT_INFO)
+
+    xOffset = 0.8
+
+    # p.loadURDF(cwd + "/robot_model/bookcase/bookshelf.urdf",
+    # useFixedBase=1,
+    # basePosition=[0 + xOffset, 0, 0.025],
+    # baseOrientation=[0, 0, 0.7068252, 0.7068252])
+    # p.loadURDF(cwd + "/robot_model/bookcase/red_can.urdf",
+    # useFixedBase=0,
+    # basePosition=[0 + xOffset, 0.75, 1.05])
+    # p.loadURDF(cwd + "/robot_model/bookcase/green_can.urdf",
+    # useFixedBase=0,
+    # basePosition=[0 + xOffset, -0.7, 1.35])
+    # p.loadURDF(cwd + "/robot_model/bookcase/blue_can.urdf",
+    # useFixedBase=0,
+    # basePosition=[0 + xOffset, 0, 0.7])
 
     # Initial Config
     set_initial_config(robot, joint_id)

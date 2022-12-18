@@ -30,6 +30,17 @@ def euler_to_rot(angles):
     return np.copy(ret)
 
 
+def euler_rates_to_ang_vel(euler_ang, euler_rates):
+    x, y, z = euler_ang[0], euler_ang[1], euler_ang[2]
+    mat = np.array([
+        np.cos(y) * np.cos(z), -np.sin(z), 0.,
+        np.cos(y) * np.sin(z),
+        np.cos(z), 0., -np.sin(y), 0., 1.
+    ]).reshape(3, 3)
+    ret = np.dot(mat, euler_rates)
+    return np.copy(ret)
+
+
 def quat_to_rot(quat):
     """
     Parameters
