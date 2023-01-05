@@ -21,6 +21,13 @@ from util import pybullet_util
 from util import util
 from util import liegroup
 
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--file", type=str)
+args = parser.parse_args()
+
+file = args.file
+
 
 def set_initial_config(robot, joint_id):
     # shoulder_x
@@ -76,13 +83,39 @@ if __name__ == "__main__":
         os.makedirs(video_dir)
 
     # Create Robot, Ground
-    p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 0)
-    robot = p.loadURDF(cwd + "/robot_model/atlas/atlas.urdf",
-                       SimConfig.INITIAL_POS_WORLD_TO_BASEJOINT,
-                       SimConfig.INITIAL_QUAT_WORLD_TO_BASEJOINT)
+    BASE_JOINT_POS = SimConfig.INITIAL_POS_WORLD_TO_BASEJOINT
 
-    p.loadURDF(cwd + "/robot_model/ground/plane.urdf", [0, 0, 0])
+    p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 0)
+    if file == "data/atlas_block.yaml":
+        BASE_JOINT_POS = [0., 0., 1.8 - 0.761]
+        block = p.loadURDF(cwd + "/robot_model/ground/block.urdf",
+                           [0, 0, 0.15],
+                           useFixedBase=True)
+    elif file == "data/atlas_stair.yaml":
+        stair = p.loadURDF(cwd + "/robot_model/ground/stair.urdf",
+                           [0.20, 0, 0.],
+                           useFixedBase=True)
+    elif file == "data/atlas_slope.yaml":
+        gap = p.loadURDF(cwd + "/robot_model/ground/slope.urdf",
+                         [0.325, 0, -0.125],
+                         useFixedBase=True)
+    elif file == 'data/atlas_chimney.yaml':
+        lr_chimney = p.loadURDF(cwd + "/robot_model/ground/chimney.urdf",
+                                [0, 0, 0],
+                                useFixedBase=True)
+    elif file == 'data/atlas_lr_chimney_jump.yaml':
+        lr_chimney = p.loadURDF(cwd + "/robot_model/ground/lr_chimney.urdf",
+                                [0, 0, 0],
+                                useFixedBase=True)
+
+    if (file != 'data/atlas_lr_chimney_jump.yaml') and (
+            file != 'data/atlas_chimney.yaml'):
+        p.loadURDF(cwd + "/robot_model/ground/plane.urdf", [0, 0, 0])
+
+    robot = p.loadURDF(cwd + "/robot_model/atlas/atlas.urdf", BASE_JOINT_POS,
+                       SimConfig.INITIAL_QUAT_WORLD_TO_BASEJOINT)
     p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 1)
+
     nq, nv, na, joint_id, link_id, pos_basejoint_to_basecom, rot_basejoint_to_basecom = pybullet_util.get_robot_config(
         robot, SimConfig.INITIAL_POS_WORLD_TO_BASEJOINT,
         SimConfig.INITIAL_QUAT_WORLD_TO_BASEJOINT, SimConfig.PRINT_ROBOT_INFO)
