@@ -106,7 +106,7 @@ class AtlasTowrPlusControlArchitecture(ControlArchitecture):
         self._sp = AtlasStateProvider()
 
     def get_command(self):
-        if (self._sp.count < 500):
+        if (self._sp.count < 150):
             if self._b_state_first_visit:
                 self._state_machine[self._state].first_visit()
                 self._b_state_first_visit = False

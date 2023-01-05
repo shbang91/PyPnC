@@ -8,7 +8,7 @@ import copy
 
 import pybullet as p
 
-from config.atlas_config import PnCConfig
+from config.atlas_config import PnCConfig, TowrPlusConfig
 from pnc.interface import Interface
 from pnc.atlas_pnc.atlas_interrupt_logic import AtlasInterruptLogic
 from pnc.atlas_pnc.atlas_state_provider import AtlasStateProvider
@@ -37,7 +37,7 @@ class AtlasInterface(Interface):
 
         self._sp = AtlasStateProvider(self._robot)
         self._se = AtlasStateEstimator(self._robot)
-        if (PnCConfig.TOWR_PLUS):
+        if (TowrPlusConfig.TOWR_PLUS):
             self._control_architecture = AtlasTowrPlusControlArchitecture(
                 self._robot)
         else:

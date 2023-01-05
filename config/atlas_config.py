@@ -31,7 +31,16 @@ class PnCConfig(object):
 
     PRINT_ROBOT_INFO = SimConfig.PRINT_ROBOT_INFO
 
+
+#########################################
+############### TOWR PLUS ###############
+#########################################
+class TowrPlusConfig(object):
     TOWR_PLUS = True
+    SOLUTION_YAML = cwd + "/data/atlas_forward_walk.yaml"
+    # SOLUTION_YAML = cwd + "/data/atlas_side_walk.yaml"
+    # SOLUTION_YAML = cwd + "/data/atlas_stair.yaml"
+    # SOLUTION_YAML = cwd + "/data/atlas_block.yaml"
 
 
 class WBCConfig(object):
@@ -128,7 +137,3 @@ class WalkingState(object):
     LF_SWING = 7
     RH_HANDREACH = 8
     LH_HANDREACH = 9
-
-
-class TowrPlusConfig(object):
-    SOLUTION_YAML = cwd + "/data/atlas_forward_walk.yaml"
