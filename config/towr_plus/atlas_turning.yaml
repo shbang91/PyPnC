@@ -2,7 +2,8 @@ solver: "ipopt"
 
 locomotion_task:
 
-    initial_base_lin: [0., 0., 0.766, 0., 0., 0.]
+    #initial_base_lin: [0., 0., 0.766, 0., 0., 0.]
+    initial_base_lin: [0., 0., 1.02, 0., 0., 0.]
     initial_base_ang: [0., 0., 0., 0., 0., 0.]
 
     # Left Foot: 0, Right Foot: 1
@@ -13,7 +14,8 @@ locomotion_task:
         0: [0., 0., 0.]
         1: [0., 0., 0.]
 
-    final_base_lin: [0., 0., 0.766, 0., 0., 0.]
+    #final_base_lin: [0., 0., 0.766, 0., 0., 0.]
+    final_base_lin: [0., 0., 1.02, 0., 0., 0.]
     final_base_ang: [0., 0., 0.52, 0., 0., 0.]
 
     terrain_type: "flat_ground"
