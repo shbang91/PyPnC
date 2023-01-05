@@ -39,8 +39,13 @@ class TowrPlusConfig(object):
     TOWR_PLUS = True
     SOLUTION_YAML = cwd + "/data/atlas_forward_walk.yaml"
     # SOLUTION_YAML = cwd + "/data/atlas_side_walk.yaml"
+    # SOLUTION_YAML = cwd + "/data/atlas_turning.yaml"
+    # SOLUTION_YAML = cwd + "/data/atlas_steer_walk.yaml"
+
+    ## TODO:not verified yet ##
     # SOLUTION_YAML = cwd + "/data/atlas_stair.yaml"
     # SOLUTION_YAML = cwd + "/data/atlas_block.yaml"
+    # SOLUTION_YAML = cwd + "/data/atlas_round_walk.yaml"
 
 
 class WBCConfig(object):
