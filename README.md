@@ -31,6 +31,14 @@ system and stabilizing the system over the trajectories.
 ```$ python plot/plot_towr_plus_trajectory.py --file=data/atlas_forward_walk.yaml --crbi_model_path=data/tf_model/atlas_crbi```
 - Replay the optimized trajectory with the robot:<br/>
 ```$ python simulator/pybullet/atlas_kinematics_main.py --file=data/atlas_forward_walk.yaml```
+### Atlas Dynamic Simulation using TOWR+ and IHWBC
+- Make sure you use right configuration variables in the TowrPlusConfig Class under ```config/atlas_config.py``` file:<br/>
+```$ TOWR_PLUS = True```<br/>
+```$ SOLUTION_YAML = cwd + "/data/atlas_forward_walk.yaml"```
+- Run the TOWR+ solution trajectories with IHWBC in the pybullet simulation environment:<br/>
+```$ python simulator/pybullet/atlas_dynamics_main.py --file=data/atlas_forward_walk.yaml```
+- Plot the cartesian tasks and joints data:<br/>
+```$ python plot/atlas/plot_task.py```
 
 ## Citation
 ```
