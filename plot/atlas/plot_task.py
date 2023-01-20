@@ -61,6 +61,20 @@ joint_vel_act = []
 
 joint_label = []
 
+## for task jacobian matrix saving
+com_jac = []
+pelvis_ori_jac = []
+upper_body_jac = []
+rfoot_pos_jac = []
+lfoot_pos_jac = []
+rfoot_ori_jac = []
+lfoot_ori_jac = []
+rhand_pos_jac = []
+lhand_pos_jac = []
+
+## for time_phase list saving
+time_phase = []
+
 with open('data/pnc.pkl', 'rb') as file:
     iter = 0
     while True:
@@ -83,6 +97,17 @@ with open('data/pnc.pkl', 'rb') as file:
             joint_pos_cmd.append(list(d['joint_pos_des'].values()))
             joint_vel_cmd.append(list(d['joint_vel_des'].values()))
             joint_trq_cmd.append(list(d['joint_trq_des'].values()))
+            com_jac.append(d['com'])
+            pelvis_ori_jac.append(d['pelvis_ori'])
+            upper_body_jac.append(d['upper_body'])
+            rfoot_pos_jac.append(d['rfoot_pos'])
+            lfoot_pos_jac.append(d['lfoot_pos'])
+            rfoot_ori_jac.append(d['rfoot_ori'])
+            lfoot_ori_jac.append(d['lfoot_ori'])
+            rhand_pos_jac.append(d['rhand_pos'])
+            lhand_pos_jac.append(d['lhand_pos'])
+
+            time_phase.append(d['time_phase'])
             iter += 1
         except EOFError:
             break
@@ -99,6 +124,16 @@ joint_vel_act = np.stack(joint_vel_act, axis=0)
 joint_pos_cmd = np.stack(joint_pos_cmd, axis=0)
 joint_vel_cmd = np.stack(joint_vel_cmd, axis=0)
 joint_trq_cmd = np.stack(joint_trq_cmd, axis=0)
+
+com_jac = np.stack(com_jac, axis=0)
+pelvis_ori_jac = np.stack(pelvis_ori_jac, axis=0)
+upper_body_jac = np.stack(upper_body_jac, axis=0)
+rfoot_pos_jac = np.stack(rfoot_pos_jac, axis=0)
+lfoot_pos_jac = np.stack(lfoot_pos_jac, axis=0)
+rfoot_ori_jac = np.stack(rfoot_ori_jac, axis=0)
+lfoot_ori_jac = np.stack(lfoot_ori_jac, axis=0)
+rhand_pos_jac = np.stack(rhand_pos_jac, axis=0)
+lhand_pos_jac = np.stack(lhand_pos_jac, axis=0)
 
 ## =============================================================================
 ## Plot Task

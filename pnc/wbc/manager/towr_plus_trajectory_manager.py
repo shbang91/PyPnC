@@ -42,6 +42,18 @@ class TowrPlusTrajectoryManager(object):
                     self._contact_schedule[foot_side] = np.array(
                         data["contact_schedule"][foot_side])
 
+                ##print out contact schedule
+                print(
+                    "=============================================================================================================="
+                )
+                print(
+                    "contact duration for each foot --> 0: Left Foot, 1: Right Foot"
+                )
+                print(self._contact_schedule)
+                print(
+                    "=============================================================================================================="
+                )
+
                 self._contact_trans_idx = dict()
                 for foot_side in [FootSide.LEFT, FootSide.RIGHT]:
                     self._contact_trans_idx[foot_side] = []

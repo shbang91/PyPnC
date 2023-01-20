@@ -64,6 +64,9 @@ class AtlasInterface(Interface):
         if PnCConfig.SAVE_DATA and (self._count % PnCConfig.SAVE_FREQ == 0):
             self._data_saver.add('time', self._running_time)
             self._data_saver.add('phase', self._control_architecture.state)
+            self._data_saver.add(
+                'time_phase',
+                [self._running_time, self._control_architecture.state])
             self._data_saver.advance()
 
         # Increase time variables
