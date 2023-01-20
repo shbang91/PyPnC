@@ -70,10 +70,15 @@ class AtlasController(object):
                                    gravity)
         # Task, Contact, and Internal Constraint Setup
         w_hierarchy_list = []
-        for task in self._tci_container.task_list:
+        for [task_str, task] in self._tci_container.task_list.items():
             task.update_jacobian()
             task.update_cmd()
             w_hierarchy_list.append(task.w_hierarchy)
+
+            if PnCConfig.SAVE_DATA and (self._sp.count % PnCConfig.SAVE_FREQ
+                                        == 0):
+                self._data_saver.add(task_str, task.jacobian)
+
         self._ihwbc.w_hierarchy = np.array(w_hierarchy_list)
         for contact in self._tci_container.contact_list:
             contact.update_contact()
