@@ -5,6 +5,7 @@ from config.draco3_config import WalkingState
 
 
 class Draco3InterruptLogic(InterruptLogic):
+
     def __init__(self, ctrl_arch):
         super(Draco3InterruptLogic, self).__init__()
         self._control_architecture = ctrl_arch

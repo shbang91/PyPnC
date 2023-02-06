@@ -32,6 +32,10 @@ class FootTrajectoryManager(object):
         self._pos_traj_mid_to_end = None
         self._quat_hermite_curve = None
 
+        self._b_first_visit = True
+        self._init_foot_iso = np.zeros((4, 4))
+        self._init_foot_twist = np.zeros(6)
+
         assert self._pos_task.target_id == self._ori_task.target_id
         self._target_id = self._pos_task.target_id
 
@@ -51,6 +55,16 @@ class FootTrajectoryManager(object):
         foot_ang_vel_des = foot_vel[0:3]
         self._ori_task.update_desired(foot_rot_des, foot_ang_vel_des,
                                       np.zeros(3))
+        # if self._b_first_visit:
+        # self._init_foot_iso = self._robot.get_link_iso(self._target_id)
+        # self._init_foot_twist = self._robot.get_link_vel(self._target_id)
+        # self._b_first_visit = False
+
+        # self._pos_task.update_desired(self._init_foot_iso[0:3, 3], np.zeros(3),
+        # np.zeros(3))
+        # self._ori_task.update_desired(
+        # util.rot_to_quat(self._init_foot_iso[0:3, 0:3]), np.zeros(3),
+        # np.zeros(3))
 
     def initialize_swing_foot_trajectory(self, start_time, swing_duration,
                                          landing_foot):

@@ -94,12 +94,14 @@ class WBCConfig(object):
     # Task Hierarchy Weights
     W_COM = 20.0
     W_TORSO = 20.0
+    # W_UPPER_BODY = 0.1
     W_UPPER_BODY = 0.1
     W_HAND_POS_MIN = 0.
     W_HAND_POS_MAX = 100.0
     W_HAND_ORI_MIN = 0.
     W_HAND_ORI_MAX = 100.0
-    W_CONTACT_FOOT = 60.0
+    # W_CONTACT_FOOT = 60.0
+    W_CONTACT_FOOT = 120.0
     W_SWING_FOOT = 40.0
 
     # Task Gains
@@ -117,10 +119,16 @@ class WBCConfig(object):
     # KP_UPPER_BODY = np.array([
     # 40., 100., 100., 100., 50., 40., 40., 100., 100., 100., 50., 40., 40.
     # ])
-
     KP_UPPER_BODY = np.array(
-        [20., 50., 50., 50., 25., 20., 20., 50., 50., 50., 25., 20., 20.])
-
+        # [20., 50., 50., 50., 25., 20., 20., 50., 50., 50., 25., 20., 20.])
+        # [
+        # 40., 100., 100., 100., 50., 40., 40., 100., 100., 100., 50., 40.,
+        # 40.
+        # ])
+        [
+            80., 200., 200., 200., 100., 80., 80., 200., 200., 200., 50., 80.,
+            80.
+        ])
     KD_UPPER_BODY = np.array(
         # [2., 8., 8., 8., 3., 2., 2., 8., 8., 8., 3., 2., 2.])
         # [4., 15., 15., 15., 6., 4., 4., 15., 15., 15., 6., 4., 4.])
@@ -130,13 +138,17 @@ class WBCConfig(object):
     KD_HAND_POS = np.array([60., 60., 60.])
     # KP_HAND_POS = np.array([250., 250., 250.])
     # KD_HAND_POS = np.array([5., 5., 5.])
-    KP_HAND_ORI = np.array([250., 250., 250.])
+    KP_HAND_ORI = np.array([300., 300., 300.])
     KD_HAND_ORI = np.array([10., 10., 10.])
 
-    KP_FOOT_POS = np.array([300., 300., 300.])
-    KD_FOOT_POS = np.array([30., 30., 30.])
-    KP_FOOT_ORI = np.array([300., 300., 300.])
-    KD_FOOT_ORI = np.array([30., 30., 30.])
+    # KP_FOOT_POS = np.array([300., 300., 300.])
+    # KD_FOOT_POS = np.array([30., 30., 30.])
+    # KP_FOOT_ORI = np.array([300., 300., 300.])
+    # KD_FOOT_ORI = np.array([30., 30., 30.])
+    KP_FOOT_POS = np.array([500., 500., 500.])
+    KD_FOOT_POS = np.array([60., 60., 60.])
+    KP_FOOT_ORI = np.array([500., 500., 500.])
+    KD_FOOT_ORI = np.array([60., 60., 60.])
 
     # Regularization terms
     LAMBDA_Q_DDOT = 1e-8
@@ -176,10 +188,10 @@ class WalkingConfig(object):
 
 
 class ManipulationConfig(object):
-    T_REACHING_TRANS_DURATION = 0.75
-    T_REACHING_DURATION = 1.5
+    T_REACHING_TRANS_DURATION = 2.
+    T_REACHING_DURATION = 3.
 
-    T_RETURNING_TRANS_DURATION = 0.75
+    T_RETURNING_TRANS_DURATION = 2.
 
     ## !! This will be overwritten in main !! ##
     LH_TARGET_POS = np.array([0.29, 0.23, 0.96])

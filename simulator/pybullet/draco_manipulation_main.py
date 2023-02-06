@@ -76,7 +76,7 @@ gripper_joints = [
     "right_ezgripper_knuckle_palm_L1_2", "right_ezgripper_knuckle_L1_L2_2"
 ]
 
-KEYPOINT_OFFSET = 0.1
+KEYPOINT_OFFSET = 0.08
 RIGHTUP_GRIPPER = np.array([[0, 0, -1], [0, 1, 0], [1, 0, 0]])
 
 SAFETY_THRESHOLD = 0.5
@@ -258,7 +258,7 @@ if __name__ == "__main__":
         robot, SimConfig.INITIAL_POS_WORLD_TO_BASEJOINT,
         SimConfig.INITIAL_QUAT_WORLD_TO_BASEJOINT, SimConfig.PRINT_ROBOT_INFO)
 
-    xOffset = 1.0
+    xOffset = 0.5
 
     p.loadURDF(cwd + "/robot_model/bookcase/bookshelf.urdf",
                useFixedBase=1,
@@ -267,12 +267,12 @@ if __name__ == "__main__":
     p.loadURDF(cwd + "/robot_model/bookcase/red_can.urdf",
                useFixedBase=0,
                basePosition=[0 + xOffset, 0.75, 1.05])
-    p.loadURDF(cwd + "/robot_model/bookcase/green_can.urdf",
-               useFixedBase=0,
-               basePosition=[0 + xOffset, -0.7, 1.35])
-    p.loadURDF(cwd + "/robot_model/bookcase/blue_can.urdf",
-               useFixedBase=0,
-               basePosition=[0 + xOffset, 0, 0.7])
+    green_can = p.loadURDF(cwd + "/robot_model/bookcase/green_can.urdf",
+                           useFixedBase=0,
+                           basePosition=[0 + xOffset, -0.5, 1.35])
+    blue_can = p.loadURDF(cwd + "/robot_model/bookcase/blue_can.urdf",
+                          useFixedBase=0,
+                          basePosition=[0 + xOffset, 0.10, 0.5])
 
     # Add Gear constraint
     c = p.createConstraint(robot,
@@ -345,12 +345,12 @@ if __name__ == "__main__":
     # Draw Frames
     pybullet_util.draw_link_frame(robot, link_id['r_hand_contact'], text="rh")
     pybullet_util.draw_link_frame(robot, link_id['l_hand_contact'], text="lh")
-    pybullet_util.draw_link_frame(robot, link_id['camera'], text="camera")
+    # pybullet_util.draw_link_frame(robot, link_id['camera'], text="camera")
     pybullet_util.draw_link_frame(lh_target_frame, -1, text="lh_target")
     pybullet_util.draw_link_frame(rh_target_frame, -1, text="rh_target")
     pybullet_util.draw_link_frame(lh_waypoint_frame, -1)
     pybullet_util.draw_link_frame(rh_waypoint_frame, -1)
-    pybullet_util.draw_link_frame(com_target_frame, -1, text="com_target")
+    # pybullet_util.draw_link_frame(com_target_frame, -1, text="com_target")
 
     gripper_command = dict()
     for gripper_joint in gripper_joints:
@@ -394,10 +394,18 @@ if __name__ == "__main__":
         elif pybullet_util.is_key_triggered(keys, '0'):
             interface.interrupt_logic.b_interrupt_button_zero = True
         elif pybullet_util.is_key_triggered(keys, '1'):
+
+            blue_can_pos = p.getBasePositionAndOrientation(blue_can)[0]
+            blue_can_pos = np.array(blue_can_pos)
+            x_offset = 0.01
+            blue_can_pos[0] += x_offset
+            z_offset = -0.04
+            blue_can_pos[2] += z_offset
             ## Update target pos and quat here
-            # lh_target_pos = np.array([0.6, 0.02, 0.83])
-            lh_target_pos = np.copy(lh_pose_ini)
-            lh_target_pos[0] += 0.02
+            # lh_target_pos = np.array([xOffset + 0.01, 0.10, 0.38])
+            lh_target_pos = np.array(blue_can_pos)
+            # lh_target_pos = np.copy(lh_pose_ini)
+            # lh_target_pos[0] += 0.02
             lh_target_rot = np.dot(RIGHTUP_GRIPPER, x_rot(0.))
             lh_target_quat = util.rot_to_quat(lh_target_rot)
             lh_target_iso = liegroup.RpToTrans(lh_target_rot, lh_target_pos)
@@ -411,10 +419,17 @@ if __name__ == "__main__":
             interface.interrupt_logic.lh_target_quat = lh_target_quat
             interface.interrupt_logic.b_interrupt_button_one = True
         elif pybullet_util.is_key_triggered(keys, '3'):
+            green_can_pos = p.getBasePositionAndOrientation(green_can)[0]
+            green_can_pos = np.array(green_can_pos)
+            x_offset = 0.01
+            green_can_pos[0] += x_offset
+            z_offset = 0.10
+            green_can_pos[2] += z_offset
+
             ## Update target pos and quat here
-            # rh_target_pos = np.array([0.4, 0., 0.83])
-            lh_target_pos = np.copy(rh_pose_ini)
-            lh_target_pos[1] -= 0.02
+            rh_target_pos = np.array(green_can_pos)
+            # lh_target_pos = np.copy(rh_pose_ini)
+            # lh_target_pos[1] -= 0.02
             rh_target_rot = np.dot(RIGHTUP_GRIPPER, x_rot(0.))
             rh_target_quat = util.rot_to_quat(rh_target_rot)
             rh_target_iso = liegroup.RpToTrans(rh_target_rot, rh_target_pos)
@@ -461,6 +476,28 @@ if __name__ == "__main__":
             interface.interrupt_logic.b_interrupt_button_r = True
         elif pybullet_util.is_key_triggered(keys, 'e'):
             interface.interrupt_logic.b_interrupt_button_e = True
+        elif pybullet_util.is_key_triggered(keys, 'p'):
+            lh_pose = pybullet_util.get_link_iso(robot,
+                                                 link_id['l_hand_contact'])[2,
+                                                                            3]
+            rh_pose = pybullet_util.get_link_iso(robot,
+                                                 link_id['r_hand_contact'])[2,
+                                                                            3]
+            print("-----------------------------------------------")
+            print("l_hand_contact vertical pos: ", lh_pose)
+            print("r_hand_contact vertical pos: ", rh_pose)
+            print("lknee joint angle: ",
+                  sensor_data['joint_pos']['l_knee_fe_jd'] * 2)
+            print("rknee joint angle: ",
+                  sensor_data['joint_pos']['r_knee_fe_jd'] * 2)
+            print("lhip pitch joint angle: ",
+                  sensor_data['joint_pos']['l_hip_fe'])
+            print("rhip pitch joint angle: ",
+                  sensor_data['joint_pos']['r_hip_fe'])
+        # elif pybullet_util.is_key_triggered(keys, 'p'):
+        # rh_pose = pybullet_util.get_link_iso(robot,
+        # link_id['r_hand_contact'])[0:3, 3]
+        # print("l_hand_contact vertical pos: ", rh_pose)
 
         # Compute Command
         if SimConfig.PRINT_TIME:
