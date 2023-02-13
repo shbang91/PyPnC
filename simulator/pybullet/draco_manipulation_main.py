@@ -25,6 +25,7 @@ import pinocchio as pin
 
 import ipdb
 import pickle
+np.set_printoptions(precision=3)
 
 ######################## Key stroke ########################
 ############## Gripper
@@ -75,6 +76,7 @@ gripper_joints = [
     "right_ezgripper_knuckle_palm_L1_1", "right_ezgripper_knuckle_L1_L2_1",
     "right_ezgripper_knuckle_palm_L1_2", "right_ezgripper_knuckle_L1_L2_2"
 ]
+# gripper_joints = []
 
 KEYPOINT_OFFSET = 0.08
 RIGHTUP_GRIPPER = np.array([[0, 0, -1], [0, 1, 0], [1, 0, 0]])
@@ -208,10 +210,10 @@ if __name__ == "__main__":
         p.connect(p.DIRECT)
     else:
         p.connect(p.GUI)
-        p.resetDebugVisualizerCamera(cameraDistance=2.0,
-                                     cameraYaw=180 + 45,
-                                     cameraPitch=-15,
-                                     cameraTargetPosition=[0.5, 0.5, 0.6])
+        p.resetDebugVisualizerCamera(cameraDistance=1.5,
+                                     cameraYaw=180 + 90,
+                                     cameraPitch=-20,
+                                     cameraTargetPosition=[0., 0., 0.7])
 
     p.setGravity(0, 0, -9.8)
     p.setPhysicsEngineParameter(fixedTimeStep=SimConfig.CONTROLLER_DT,
@@ -225,6 +227,7 @@ if __name__ == "__main__":
     # Create Robot, Ground
     p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 0)
     robot = p.loadURDF(
+        # cwd + "/robot_model/draco3/draco_modified.urdf",
         cwd + "/robot_model/draco3/draco3_gripper_mesh_updated.urdf",
         SimConfig.INITIAL_POS_WORLD_TO_BASEJOINT,
         SimConfig.INITIAL_QUAT_WORLD_TO_BASEJOINT)
@@ -258,7 +261,7 @@ if __name__ == "__main__":
         robot, SimConfig.INITIAL_POS_WORLD_TO_BASEJOINT,
         SimConfig.INITIAL_QUAT_WORLD_TO_BASEJOINT, SimConfig.PRINT_ROBOT_INFO)
 
-    xOffset = 0.5
+    xOffset = 0.55
 
     p.loadURDF(cwd + "/robot_model/bookcase/bookshelf.urdf",
                useFixedBase=1,
@@ -269,10 +272,10 @@ if __name__ == "__main__":
                basePosition=[0 + xOffset, 0.75, 1.05])
     green_can = p.loadURDF(cwd + "/robot_model/bookcase/green_can.urdf",
                            useFixedBase=0,
-                           basePosition=[0 + xOffset, -0.5, 1.35])
+                           basePosition=[xOffset - 0.05, -0.5, 1.4])
     blue_can = p.loadURDF(cwd + "/robot_model/bookcase/blue_can.urdf",
                           useFixedBase=0,
-                          basePosition=[0 + xOffset, 0.10, 0.5])
+                          basePosition=[xOffset - 0.05, 0.2, 0.3])
 
     # Add Gear constraint
     c = p.createConstraint(robot,
@@ -343,13 +346,13 @@ if __name__ == "__main__":
                                              link_id['r_hand_contact'])[0:3, 3]
 
     # Draw Frames
-    pybullet_util.draw_link_frame(robot, link_id['r_hand_contact'], text="rh")
+    # pybullet_util.draw_link_frame(robot, link_id['r_hand_contact'], text="rh")
     pybullet_util.draw_link_frame(robot, link_id['l_hand_contact'], text="lh")
     # pybullet_util.draw_link_frame(robot, link_id['camera'], text="camera")
     pybullet_util.draw_link_frame(lh_target_frame, -1, text="lh_target")
-    pybullet_util.draw_link_frame(rh_target_frame, -1, text="rh_target")
+    # pybullet_util.draw_link_frame(rh_target_frame, -1, text="rh_target")
     pybullet_util.draw_link_frame(lh_waypoint_frame, -1)
-    pybullet_util.draw_link_frame(rh_waypoint_frame, -1)
+    # pybullet_util.draw_link_frame(rh_waypoint_frame, -1)
     # pybullet_util.draw_link_frame(com_target_frame, -1, text="com_target")
 
     gripper_command = dict()
@@ -357,6 +360,7 @@ if __name__ == "__main__":
         gripper_command[gripper_joint] = nominal_sensor_data['joint_pos'][
             gripper_joint]
 
+    __import__('ipdb').set_trace()
     while (1):
 
         # Get SensorData
@@ -397,9 +401,14 @@ if __name__ == "__main__":
 
             blue_can_pos = p.getBasePositionAndOrientation(blue_can)[0]
             blue_can_pos = np.array(blue_can_pos)
-            x_offset = 0.01
+            x_offset = 0.
             blue_can_pos[0] += x_offset
-            z_offset = -0.04
+
+            ## -0.2 ~ 0.5
+            y_offset = -0.1
+            blue_can_pos[1] += y_offset
+
+            z_offset = 0.0
             blue_can_pos[2] += z_offset
             ## Update target pos and quat here
             # lh_target_pos = np.array([xOffset + 0.01, 0.10, 0.38])
@@ -421,9 +430,13 @@ if __name__ == "__main__":
         elif pybullet_util.is_key_triggered(keys, '3'):
             green_can_pos = p.getBasePositionAndOrientation(green_can)[0]
             green_can_pos = np.array(green_can_pos)
-            x_offset = 0.01
+            x_offset = 0.0
             green_can_pos[0] += x_offset
-            z_offset = 0.10
+
+            y_offset = 0.0
+            green_can_pos[1] += y_offset
+
+            z_offset = 0.1
             green_can_pos[2] += z_offset
 
             ## Update target pos and quat here
@@ -477,15 +490,13 @@ if __name__ == "__main__":
         elif pybullet_util.is_key_triggered(keys, 'e'):
             interface.interrupt_logic.b_interrupt_button_e = True
         elif pybullet_util.is_key_triggered(keys, 'p'):
-            lh_pose = pybullet_util.get_link_iso(robot,
-                                                 link_id['l_hand_contact'])[2,
-                                                                            3]
-            rh_pose = pybullet_util.get_link_iso(robot,
-                                                 link_id['r_hand_contact'])[2,
-                                                                            3]
+            lh_pose = pybullet_util.get_link_iso(
+                robot, link_id['l_hand_contact'])[0:3, 3]
+            rh_pose = pybullet_util.get_link_iso(
+                robot, link_id['r_hand_contact'])[0:3, 3]
             print("-----------------------------------------------")
-            print("l_hand_contact vertical pos: ", lh_pose)
-            print("r_hand_contact vertical pos: ", rh_pose)
+            print("l_hand_contact global pos: ", lh_pose)
+            print("r_hand_contact global pos: ", rh_pose)
             print("lknee joint angle: ",
                   sensor_data['joint_pos']['l_knee_fe_jd'] * 2)
             print("rknee joint angle: ",
@@ -494,6 +505,10 @@ if __name__ == "__main__":
                   sensor_data['joint_pos']['l_hip_fe'])
             print("rhip pitch joint angle: ",
                   sensor_data['joint_pos']['r_hip_fe'])
+            print("lknee trq command: ",
+                  command['joint_trq']['l_knee_fe_jd'] / 2)
+            print("rknee trq command: ",
+                  command['joint_trq']['r_knee_fe_jd'] / 2)
         # elif pybullet_util.is_key_triggered(keys, 'p'):
         # rh_pose = pybullet_util.get_link_iso(robot,
         # link_id['r_hand_contact'])[0:3, 3]

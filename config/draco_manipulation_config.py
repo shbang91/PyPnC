@@ -126,9 +126,10 @@ class WBCConfig(object):
         # 40.
         # ])
         [
-            80., 200., 200., 200., 100., 80., 80., 200., 200., 200., 50., 80.,
-            80.
+            100., 250., 250., 250., 100., 100., 100., 250., 250., 250., 100.,
+            100., 100.
         ])
+
     KD_UPPER_BODY = np.array(
         # [2., 8., 8., 8., 3., 2., 2., 8., 8., 8., 3., 2., 2.])
         # [4., 15., 15., 15., 6., 4., 4., 15., 15., 15., 6., 4., 4.])
@@ -138,7 +139,7 @@ class WBCConfig(object):
     KD_HAND_POS = np.array([60., 60., 60.])
     # KP_HAND_POS = np.array([250., 250., 250.])
     # KD_HAND_POS = np.array([5., 5., 5.])
-    KP_HAND_ORI = np.array([300., 300., 300.])
+    KP_HAND_ORI = np.array([250., 250., 250.])
     KD_HAND_ORI = np.array([10., 10., 10.])
 
     # KP_FOOT_POS = np.array([300., 300., 300.])
@@ -154,8 +155,8 @@ class WBCConfig(object):
     LAMBDA_Q_DDOT = 1e-8
     LAMBDA_RF = 1e-7
 
-    # B_TRQ_LIMIT = True
-    B_TRQ_LIMIT = False
+    B_TRQ_LIMIT = True
+    # B_TRQ_LIMIT = False
 
     # Integration Parameters
     VEL_CUTOFF_FREQ = 2.0  #Hz

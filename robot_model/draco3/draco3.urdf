@@ -557,7 +557,7 @@
     <parent link="l_hip_fe_link"/>
     <child link="l_knee_fe_lp"/>
     <axis xyz="0 1 0"/>
-    <limit effort="40.85" lower="-0.0872665" upper="1.52716" velocity="13.35"/>
+    <limit effort="72.6" lower="-0.0872665" upper="1.52716" velocity="7.51"/>
     <joint_properties friction="0.0"/>
   </joint>
   <link name="l_knee_fe_lp">
@@ -602,7 +602,7 @@
     <parent link="l_knee_fe_lp"/>
     <child link="l_knee_fe_ld"/>
     <axis xyz="0 1 0"/>
-    <limit effort="40.85" lower="-0.0872665" upper="1.52716" velocity="13.35"/>
+    <limit effort="72.6" lower="-0.0872665" upper="1.52716" velocity="7.51"/>
   </joint>
   <link name="l_knee_fe_ld">
     <visual>
@@ -774,7 +774,7 @@
     <parent link="r_hip_fe_link"/>
     <child link="r_knee_fe_lp"/>
     <axis xyz="0 1 0"/>
-    <limit effort="40.85" lower="-0.0872665" upper="1.52716" velocity="13.35"/>
+    <limit effort="72.6" lower="-0.0872665" upper="1.52716" velocity="7.51"/>
     <joint_properties friction="0.0"/>
   </joint>
   <link name="r_knee_fe_lp">
@@ -819,7 +819,7 @@
     <parent link="r_knee_fe_lp"/>
     <child link="r_knee_fe_ld"/>
     <axis xyz="0 1 0"/>
-    <limit effort="40.85" lower="-0.0872665" upper="1.52716" velocity="13.35"/>
+    <limit effort="72.6" lower="-0.0872665" upper="1.52716" velocity="7.51"/>
     <joint_properties friction="0.0"/>
   </joint>
   <link name="r_knee_fe_ld">

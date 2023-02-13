@@ -77,7 +77,7 @@
   </link>
 
   <joint name="j2" type="fixed">
-    <origin rpy="0 0 0" xyz="-1 0 0.3"/>
+    <origin rpy="0 0 0" xyz="-1 0 0.1"/>
     <parent link="leftSide"/>
     <child link="shelf1"/>
   </joint>
