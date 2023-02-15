@@ -10,6 +10,7 @@ from pnc.atlas_pnc.atlas_state_provider import AtlasStateProvider
 
 
 class AtlasController(object):
+
     def __init__(self, tci_container, robot):
         self._tci_container = tci_container
         self._robot = robot
@@ -104,6 +105,8 @@ class AtlasController(object):
                                  copy.deepcopy(command['joint_vel']))
             self._data_saver.add('joint_trq_des',
                                  copy.deepcopy(command['joint_trq']))
+            self._data_saver.add('pelvis_com_pos',
+                                 self._robot.get_link_iso('pelvis_com')[:3, 3])
 
         return command
 
