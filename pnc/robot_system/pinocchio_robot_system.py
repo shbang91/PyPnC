@@ -22,6 +22,7 @@ class PinocchioRobotSystem(RobotSystem):
     Note that first six element of generalized velocities are represented in the
     base joint frame acting on the base joint frame.
     """
+
     def __init__(self,
                  urdf_file,
                  package_dir,
@@ -55,6 +56,7 @@ class PinocchioRobotSystem(RobotSystem):
                 passing_idx += 1
             else:
                 self._joint_id[j_name] = j_id - passing_idx
+        print(self._joint_id)
 
         for f_id, frame in enumerate(self._model.frames):
             if frame.name == 'root_joint' or frame.name == 'universe':

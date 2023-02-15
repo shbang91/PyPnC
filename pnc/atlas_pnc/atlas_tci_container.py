@@ -76,11 +76,23 @@ class AtlasTCIContainer(TCIContainer):
         self._lhand_pos_task.kd = WBCConfig.KD_HAND_POS
         self._lhand_pos_task.w_hierarchy = WBCConfig.W_HAND_POS_MIN
 
-        self._task_list = [
-            self._com_task, self._pelvis_ori_task, self._upper_body_task,
-            self._rfoot_pos_task, self._lfoot_pos_task, self._rfoot_ori_task,
-            self._lfoot_ori_task, self._rhand_pos_task, self._lhand_pos_task
-        ]
+        # self._task_list = [
+        # self._com_task, self._pelvis_ori_task, self._upper_body_task,
+        # self._rfoot_pos_task, self._lfoot_pos_task, self._rfoot_ori_task,
+        # self._lfoot_ori_task, self._rhand_pos_task, self._lhand_pos_task
+        # ]
+
+        self._task_list = {
+            "com": self._com_task,
+            "pelvis_ori": self._pelvis_ori_task,
+            "upper_body": self._upper_body_task,
+            "rfoot_pos": self._rfoot_pos_task,
+            "lfoot_pos": self._lfoot_pos_task,
+            "rfoot_ori": self._rfoot_ori_task,
+            "lfoot_ori": self._lfoot_ori_task,
+            "rhand_pos": self._rhand_pos_task,
+            "lhand_pos": self._lhand_pos_task
+        }
 
         # ======================================================================
         # Initialize Contact

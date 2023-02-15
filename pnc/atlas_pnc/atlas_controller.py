@@ -10,6 +10,7 @@ from pnc.atlas_pnc.atlas_state_provider import AtlasStateProvider
 
 
 class AtlasController(object):
+
     def __init__(self, tci_container, robot):
         self._tci_container = tci_container
         self._robot = robot
@@ -70,10 +71,15 @@ class AtlasController(object):
                                    gravity)
         # Task, Contact, and Internal Constraint Setup
         w_hierarchy_list = []
-        for task in self._tci_container.task_list:
+        for [task_str, task] in self._tci_container.task_list.items():
             task.update_jacobian()
             task.update_cmd()
             w_hierarchy_list.append(task.w_hierarchy)
+
+            if PnCConfig.SAVE_DATA and (self._sp.count % PnCConfig.SAVE_FREQ
+                                        == 0):
+                self._data_saver.add(task_str, task.jacobian)
+
         self._ihwbc.w_hierarchy = np.array(w_hierarchy_list)
         for contact in self._tci_container.contact_list:
             contact.update_contact()
@@ -99,6 +105,8 @@ class AtlasController(object):
                                  copy.deepcopy(command['joint_vel']))
             self._data_saver.add('joint_trq_des',
                                  copy.deepcopy(command['joint_trq']))
+            self._data_saver.add('pelvis_com_pos',
+                                 self._robot.get_link_iso('pelvis_com')[:3, 3])
 
         return command
 

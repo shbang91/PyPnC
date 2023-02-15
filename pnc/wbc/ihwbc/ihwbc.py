@@ -88,7 +88,7 @@ class IHWBC(object):
         self._gravity = np.copy(gravity)
 
     def solve(self,
-              task_list,
+              task_dict,
               contact_list,
               internal_constraint_list,
               rf_des=None,
@@ -96,8 +96,8 @@ class IHWBC(object):
         """
         Parameters
         ----------
-        task_list (list of Task):
-            Task list
+        task_dict (dict of Task):
+            Task dict
         contact_list (list of Contact):
             Contact list
         internal_constraint_list (list of InternalConstraint):
@@ -159,13 +159,13 @@ class IHWBC(object):
         cost_t_mat = np.zeros((self._n_q_dot, self._n_q_dot))
         cost_t_vec = np.zeros(self._n_q_dot)
 
-        for i, task in enumerate(task_list):
+        for i, (task_str, task) in enumerate(task_dict.items()):
             j = task.jacobian
             j_dot_q_dot = task.jacobian_dot_q_dot
             x_ddot = task.op_cmd
             if verbose:
                 print("====================")
-                print(task.target_id, " task")
+                print(task_str, " task")
                 task.debug()
 
             cost_t_mat += self._w_hierarchy[i] * np.dot(j.transpose(), j)
@@ -361,8 +361,8 @@ class IHWBC(object):
             print("sol_q_ddot: ", sol_q_ddot)
             print("sol_rf: ", sol_rf)
 
-            # for i, task in enumerate(task_list):
-            for task in [task_list[3], task_list[4]]:
+            # for i, task in enumerate(task_dict):
+            for task in [task_dict["rfoot_pos"], task_dict["lfoot_pos"]]:
                 j = task.jacobian
                 j_dot_q_dot = task.jacobian_dot_q_dot
                 x_ddot = task.op_cmd
