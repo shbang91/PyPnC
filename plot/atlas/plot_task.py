@@ -44,6 +44,7 @@ phase = []
 rf_cmd = []
 
 pelvis_com_pos = []
+pelvis_com_vel = []
 
 des, act = dict(), dict()
 for topic in tasks:
@@ -97,6 +98,7 @@ with open('data/pnc.pkl', 'rb') as file:
                 rf_z_max[topic].append(d[topic])
             rf_cmd.append(d['rf_cmd'])
             pelvis_com_pos.append(d['pelvis_com_pos'])
+            pelvis_com_vel.append(d['pelvis_com_vel'])
             joint_pos_act.append(list(d['joint_pos_act'].values()))
             joint_vel_act.append(list(d['joint_vel_act'].values()))
             joint_pos_cmd.append(list(d['joint_pos_des'].values()))
@@ -123,6 +125,7 @@ for k, v in act.items():
     act[k] = np.stack(v, axis=0)
 rf_cmd = np.stack(rf_cmd, axis=0)
 pelvis_com_pos = np.stack(pelvis_com_pos, axis=0)
+pelvis_com_vel = np.stack(pelvis_com_vel, axis=0)
 phase = np.stack(phase, axis=0)
 
 joint_pos_act = np.stack(joint_pos_act, axis=0)
