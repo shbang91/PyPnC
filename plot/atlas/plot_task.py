@@ -77,8 +77,6 @@ lfoot_ori_jac = []
 rhand_pos_jac = []
 lhand_pos_jac = []
 
-## for time_phase list saving
-time_phase = []
 
 with open('data/pnc.pkl', 'rb') as file:
     iter = 0
@@ -114,7 +112,6 @@ with open('data/pnc.pkl', 'rb') as file:
             rhand_pos_jac.append(d['rhand_pos'])
             lhand_pos_jac.append(d['lhand_pos'])
 
-            time_phase.append(d['time_phase'])
             iter += 1
         except EOFError:
             break
