@@ -42,6 +42,10 @@ class AtlasStateEstimator(object):
                                  copy.deepcopy(sensor_data['joint_pos']))
             self._data_saver.add('joint_vel_act',
                                  copy.deepcopy(sensor_data['joint_vel']))
+            self._data_saver.add('lf_contact',
+                                 (self._sp.curr_time, self._sp.b_lf_contact))
+            self._data_saver.add('rf_contact',
+                                 (self._sp.curr_time, self._sp.b_rf_contact))
 
     def _update_dcm(self):
         com_pos = self._robot.get_com_pos()

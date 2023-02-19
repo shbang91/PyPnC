@@ -77,6 +77,9 @@ lfoot_ori_jac = []
 rhand_pos_jac = []
 lhand_pos_jac = []
 
+## for foot contact info
+lf_contact = []
+rf_contact = []
 
 with open('data/pnc.pkl', 'rb') as file:
     iter = 0
@@ -112,6 +115,9 @@ with open('data/pnc.pkl', 'rb') as file:
             rhand_pos_jac.append(d['rhand_pos'])
             lhand_pos_jac.append(d['lhand_pos'])
 
+            lf_contact.append(d['lf_contact'])
+            rf_contact.append(d['rf_contact'])
+
             iter += 1
         except EOFError:
             break
@@ -140,6 +146,9 @@ rfoot_ori_jac = np.stack(rfoot_ori_jac, axis=0)
 lfoot_ori_jac = np.stack(lfoot_ori_jac, axis=0)
 rhand_pos_jac = np.stack(rhand_pos_jac, axis=0)
 lhand_pos_jac = np.stack(lhand_pos_jac, axis=0)
+
+lf_contact = np.stack(lf_contact, axis=0)
+rf_contact = np.stack(rf_contact, axis=0)
 
 ## =============================================================================
 ## Plot Task
