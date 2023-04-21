@@ -29,7 +29,7 @@ locomotion_param:
     dt_constraint_range_of_motion: 0.08
     dt_constraint_dynamic: 0.1
     dt_constraint_base_motion: 0.025
-    b_optimize_timings: true
+    b_optimize_timings: false
     bound_phase_duration: [0.25, 0.25]
 
     ## =========================================================================
@@ -46,8 +46,10 @@ locomotion_param:
     # LF: {1.5ds, ss, 2ds+ss, ss, 2ds+ss, ss, ds+b}
     # RF: {2.5ds+ss, ss, 2ds+ss, ss, 2ds+ss+b}
     ee_phase_durations:
-        0: [0.675, 0.75, 1.65, 0.75, 1.65, 0.75, 1.929252]
-        1: [1.875, 0.75, 1.65, 0.75, 1.65, 0.75, 0.729252]
+        #0: [0.675, 0.75, 1.65, 0.75, 1.65, 0.75, 1.929252]
+        #1: [1.875, 0.75, 1.65, 0.75, 1.65, 0.75, 0.729252]
+        0: [0.300, 0.375, 0.825, 0.375, 0.825, 0.375, 0.964626]
+        1: [0.900, 0.375, 0.825, 0.375, 0.825, 0.375, 0.364626]
     ee_in_contact_at_start:
         0: True
         1: True
