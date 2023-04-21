@@ -22,7 +22,6 @@ class PinocchioRobotSystem(RobotSystem):
     Note that first six element of generalized velocities are represented in the
     base joint frame acting on the base joint frame.
     """
-
     def __init__(self,
                  urdf_file,
                  package_dir,

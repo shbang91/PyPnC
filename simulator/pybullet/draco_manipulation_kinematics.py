@@ -15,7 +15,7 @@ import numpy as np
 
 np.set_printoptions(precision=2)
 
-from config.draco_manipulation_config import SimConfig
+from config.draco_manipulation_kinematics_config import SimConfig
 from pnc.draco_manipulation_pnc.draco_manipulation_interface import DracoManipulationInterface
 from util import pybullet_util
 from util import util
@@ -76,18 +76,11 @@ gripper_joints = [
     "right_ezgripper_knuckle_palm_L1_1", "right_ezgripper_knuckle_L1_L2_1",
     "right_ezgripper_knuckle_palm_L1_2", "right_ezgripper_knuckle_L1_L2_2"
 ]
-# gripper_joints = []
 
 KEYPOINT_OFFSET = 0.08
 RIGHTUP_GRIPPER = np.array([[0, 0, -1], [0, 1, 0], [1, 0, 0]])
 
-SAFETY_THRESHOLD = 0.5
-
 grid_location = util.GridLocation(np.array([0.05, 0.05, 0.05]))
-saf_list = [None] * 7
-for i in range(7):
-    with open('saf/saf_{}.pkl'.format(i), 'rb') as f:
-        saf_list[i] = pickle.load(f)
 
 
 def is_lh_reachable(sensor_data, global_goal):
@@ -215,11 +208,12 @@ if __name__ == "__main__":
                                      cameraPitch=-20,
                                      cameraTargetPosition=[0., 0., 0.7])
 
-    p.setGravity(0, 0, -9.8)
-    p.setPhysicsEngineParameter(fixedTimeStep=SimConfig.CONTROLLER_DT,
-                                numSubSteps=SimConfig.N_SUBSTEP)
+    # p.setGravity(0, 0, -9.8)
+    # p.setPhysicsEngineParameter(fixedTimeStep=SimConfig.CONTROLLER_DT,
+    # numSubSteps=SimConfig.N_SUBSTEP)
+
     if SimConfig.VIDEO_RECORD:
-        video_dir = 'video/draco3_pnc'
+        video_dir = 'video/draco3_ik'
         if os.path.exists(video_dir):
             shutil.rmtree(video_dir)
         os.makedirs(video_dir)
@@ -227,8 +221,8 @@ if __name__ == "__main__":
     # Create Robot, Ground
     p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 0)
     robot = p.loadURDF(
-        # cwd + "/robot_model/draco3/draco_modified.urdf",
-        cwd + "/robot_model/draco3/draco3_gripper_mesh_updated.urdf",
+        # cwd + "/robot_model/draco3/draco3_gripper_mesh_updated.urdf",
+        cwd + "/robot_model/draco3/draco3_ik.urdf",
         SimConfig.INITIAL_POS_WORLD_TO_BASEJOINT,
         SimConfig.INITIAL_QUAT_WORLD_TO_BASEJOINT)
 
@@ -277,26 +271,27 @@ if __name__ == "__main__":
                           useFixedBase=0,
                           basePosition=[xOffset - 0.05, 0.2, 0.3])
 
+    ##TODO: RCJ constraints
     # Add Gear constraint
-    c = p.createConstraint(robot,
-                           link_id['l_knee_fe_lp'],
-                           robot,
-                           link_id['l_knee_fe_ld'],
-                           jointType=p.JOINT_GEAR,
-                           jointAxis=[0, 1, 0],
-                           parentFramePosition=[0, 0, 0],
-                           childFramePosition=[0, 0, 0])
-    p.changeConstraint(c, gearRatio=-1, maxForce=500, erp=10)
+    # c = p.createConstraint(robot,
+    # link_id['l_knee_fe_lp'],
+    # robot,
+    # link_id['l_knee_fe_ld'],
+    # jointType=p.JOINT_GEAR,
+    # jointAxis=[0, 1, 0],
+    # parentFramePosition=[0, 0, 0],
+    # childFramePosition=[0, 0, 0])
+    # p.changeConstraint(c, gearRatio=-1, maxForce=500, erp=10)
 
-    c = p.createConstraint(robot,
-                           link_id['r_knee_fe_lp'],
-                           robot,
-                           link_id['r_knee_fe_ld'],
-                           jointType=p.JOINT_GEAR,
-                           jointAxis=[0, 1, 0],
-                           parentFramePosition=[0, 0, 0],
-                           childFramePosition=[0, 0, 0])
-    p.changeConstraint(c, gearRatio=-1, maxForce=500, erp=10)
+    # c = p.createConstraint(robot,
+    # link_id['r_knee_fe_lp'],
+    # robot,
+    # link_id['r_knee_fe_ld'],
+    # jointType=p.JOINT_GEAR,
+    # jointAxis=[0, 1, 0],
+    # parentFramePosition=[0, 0, 0],
+    # childFramePosition=[0, 0, 0])
+    # p.changeConstraint(c, gearRatio=-1, maxForce=500, erp=10)
 
     if SimConfig.B_USE_MESHCAT:
         # Create Robot for Meshcat Visualization
@@ -322,14 +317,13 @@ if __name__ == "__main__":
     pybullet_util.set_link_damping(robot, link_id.values(), 0., 0.)
 
     # Joint Friction
-    pybullet_util.set_joint_friction(robot, joint_id, 0.)
-    gripper_attached_joint_id = OrderedDict()
-    gripper_attached_joint_id["l_wrist_pitch"] = joint_id["l_wrist_pitch"]
-    gripper_attached_joint_id["r_wrist_pitch"] = joint_id["r_wrist_pitch"]
-    pybullet_util.set_joint_friction(robot, gripper_attached_joint_id, 0.1)
+    # pybullet_util.set_joint_friction(robot, joint_id, 0.)
+    # gripper_attached_joint_id = OrderedDict()
+    # gripper_attached_joint_id["l_wrist_pitch"] = joint_id["l_wrist_pitch"]
+    # gripper_attached_joint_id["r_wrist_pitch"] = joint_id["r_wrist_pitch"]
+    # pybullet_util.set_joint_friction(robot, gripper_attached_joint_id, 0.1)
 
-    # Construct Interface
-    interface = DracoManipulationInterface()
+    ##TODO: ik controller instance initialize
 
     # Run Sim
     t = 0
@@ -355,12 +349,11 @@ if __name__ == "__main__":
     # pybullet_util.draw_link_frame(rh_waypoint_frame, -1)
     # pybullet_util.draw_link_frame(com_target_frame, -1, text="com_target")
 
-    gripper_command = dict()
-    for gripper_joint in gripper_joints:
-        gripper_command[gripper_joint] = nominal_sensor_data['joint_pos'][
-            gripper_joint]
+    # gripper_command = dict()
+    # for gripper_joint in gripper_joints:
+    # gripper_command[gripper_joint] = nominal_sensor_data['joint_pos'][
+    # gripper_joint]
 
-    # __import__('ipdb').set_trace()
     while (1):
 
         # Get SensorData
@@ -376,28 +369,10 @@ if __name__ == "__main__":
                                                link_id['r_foot_contact'])[2, 3]
         lf_height = pybullet_util.get_link_iso(robot,
                                                link_id['l_foot_contact'])[2, 3]
-        sensor_data['b_rf_contact'] = True if rf_height <= 0.01 else False
-        sensor_data['b_lf_contact'] = True if lf_height <= 0.01 else False
 
         # Get Keyboard Event
         keys = p.getKeyboardEvents()
-        if pybullet_util.is_key_triggered(keys, '8'):
-            interface.interrupt_logic.b_interrupt_button_eight = True
-        elif pybullet_util.is_key_triggered(keys, '5'):
-            interface.interrupt_logic.b_interrupt_button_five = True
-        elif pybullet_util.is_key_triggered(keys, '4'):
-            interface.interrupt_logic.b_interrupt_button_four = True
-        elif pybullet_util.is_key_triggered(keys, '2'):
-            interface.interrupt_logic.b_interrupt_button_two = True
-        elif pybullet_util.is_key_triggered(keys, '6'):
-            interface.interrupt_logic.b_interrupt_button_six = True
-        elif pybullet_util.is_key_triggered(keys, '7'):
-            interface.interrupt_logic.b_interrupt_button_seven = True
-        elif pybullet_util.is_key_triggered(keys, '9'):
-            interface.interrupt_logic.b_interrupt_button_nine = True
-        elif pybullet_util.is_key_triggered(keys, '0'):
-            interface.interrupt_logic.b_interrupt_button_zero = True
-        elif pybullet_util.is_key_triggered(keys, '1'):
+        if pybullet_util.is_key_triggered(keys, '1'):
 
             blue_can_pos = p.getBasePositionAndOrientation(blue_can)[0]
             blue_can_pos = np.array(blue_can_pos)
@@ -427,6 +402,7 @@ if __name__ == "__main__":
             interface.interrupt_logic.lh_waypoint_pos = lh_waypoint_pos
             interface.interrupt_logic.lh_target_quat = lh_target_quat
             interface.interrupt_logic.b_interrupt_button_one = True
+
         elif pybullet_util.is_key_triggered(keys, '3'):
             green_can_pos = p.getBasePositionAndOrientation(green_can)[0]
             green_can_pos = np.array(green_can_pos)
@@ -455,8 +431,6 @@ if __name__ == "__main__":
             interface.interrupt_logic.rh_waypoint_pos = rh_waypoint_pos
             interface.interrupt_logic.rh_target_quat = rh_target_quat
             interface.interrupt_logic.b_interrupt_button_three = True
-        elif pybullet_util.is_key_triggered(keys, 't'):
-            interface.interrupt_logic.b_interrupt_button_t = True
         elif pybullet_util.is_key_triggered(keys, 'z'):
             for k, v in gripper_command.items():
                 if k.split('_')[0] == "left":
@@ -477,18 +451,6 @@ if __name__ == "__main__":
                 if k.split('_')[0] == "right":
                     gripper_command[k] -= 1.94 / 3.
             t_right_gripper_command_recv = t
-        elif pybullet_util.is_key_triggered(keys, 'm'):
-            com_target_x = 0.35
-            interface.interrupt_logic.com_displacement_x = com_target_x
-            interface.interrupt_logic.b_interrupt_button_m = True
-        elif pybullet_util.is_key_triggered(keys, 'n'):
-            com_target_y = 0.23
-            interface.interrupt_logic.com_displacement_y = com_target_y
-            interface.interrupt_logic.b_interrupt_button_n = True
-        elif pybullet_util.is_key_triggered(keys, 'r'):
-            interface.interrupt_logic.b_interrupt_button_r = True
-        elif pybullet_util.is_key_triggered(keys, 'e'):
-            interface.interrupt_logic.b_interrupt_button_e = True
         elif pybullet_util.is_key_triggered(keys, 'p'):
             lh_pose = pybullet_util.get_link_iso(
                 robot, link_id['l_hand_contact'])[0:3, 3]
@@ -509,15 +471,8 @@ if __name__ == "__main__":
                   command['joint_trq']['l_knee_fe_jd'] / 2)
             print("rknee trq command: ",
                   command['joint_trq']['r_knee_fe_jd'] / 2)
-        # elif pybullet_util.is_key_triggered(keys, 'p'):
-        # rh_pose = pybullet_util.get_link_iso(robot,
-        # link_id['r_hand_contact'])[0:3, 3]
-        # print("l_hand_contact vertical pos: ", rh_pose)
 
-        # Compute Command
-        if SimConfig.PRINT_TIME:
-            start_time = time.time()
-        command = interface.get_command(copy.deepcopy(sensor_data))
+        # TODO:Compute Command
 
         p.resetBasePositionAndOrientation(lh_target_frame, lh_target_pos,
                                           lh_target_quat)
@@ -531,37 +486,20 @@ if __name__ == "__main__":
                                           [com_target_x, com_target_y, 0.02],
                                           [0., 0., 0., 1.])
 
-        if SimConfig.PRINT_TIME:
-            end_time = time.time()
-            print("ctrl computation time: ", end_time - start_time)
-
         # Exclude Knee Proximal Joints Command
-        del command['joint_pos']['l_knee_fe_jp']
-        del command['joint_pos']['r_knee_fe_jp']
-        del command['joint_vel']['l_knee_fe_jp']
-        del command['joint_vel']['r_knee_fe_jp']
-        del command['joint_trq']['l_knee_fe_jp']
-        del command['joint_trq']['r_knee_fe_jp']
+        # del command['joint_pos']['l_knee_fe_jp']
+        # del command['joint_pos']['r_knee_fe_jp']
+        # del command['joint_vel']['l_knee_fe_jp']
+        # del command['joint_vel']['r_knee_fe_jp']
+        # del command['joint_trq']['l_knee_fe_jp']
+        # del command['joint_trq']['r_knee_fe_jp']
 
-        # Apply Command
-        pybullet_util.set_motor_trq(robot, joint_id, command['joint_trq'])
+        # TODO:Apply Command visualize command
+        # pybullet_util.set_motor_trq(robot, joint_id, command['joint_trq'])
         # pybullet_util.set_motor_impedance(robot, joint_id, command,
         # SimConfig.KP, SimConfig.KD)
 
-        pybullet_util.set_motor_pos(robot, joint_id, gripper_command)
-
-        # Update Stanby variables
-        if t >= t_left_gripper_command_recv + t_gripper_stab_dur:
-            b_left_gripper_ready = True
-        else:
-            b_left_gripper_ready = False
-        if t >= t_right_gripper_command_recv + t_gripper_stab_dur:
-            b_right_gripper_ready = True
-        else:
-            b_right_gripper_ready = False
-        b_left_hand_ready = interface.interrupt_logic.b_left_hand_ready
-        b_right_hand_ready = interface.interrupt_logic.b_right_hand_ready
-        b_walk_ready = interface.interrupt_logic.b_walk_ready
+        # pybullet_util.set_motor_pos(robot, joint_id, gripper_command)
 
         # Save Image
         if (SimConfig.VIDEO_RECORD) and (count % SimConfig.RECORD_FREQ == 0):
@@ -576,12 +514,10 @@ if __name__ == "__main__":
         if SimConfig.B_USE_MESHCAT:
             vis_q[0:3] = sensor_data['base_joint_pos']
             vis_q[3:7] = sensor_data['base_joint_quat']
-            for i, (k, v) in enumerate(sensor_data['joint_pos'].items()):
+            for _, (k, v) in enumerate(sensor_data['joint_pos'].items()):
                 idx = interface._robot.get_q_idx(k)
                 vis_q[idx] = v
             viz.display(vis_q)
 
-        p.stepSimulation()
-        # time.sleep(dt)
         t += dt
         count += 1
