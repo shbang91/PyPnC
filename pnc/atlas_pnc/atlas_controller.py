@@ -10,6 +10,7 @@ from pnc.atlas_pnc.atlas_state_provider import AtlasStateProvider
 
 
 class AtlasController(object):
+
     def __init__(self, tci_container, robot):
         self._tci_container = tci_container
         self._robot = robot
@@ -78,6 +79,14 @@ class AtlasController(object):
             if PnCConfig.SAVE_DATA and (self._sp.count % PnCConfig.SAVE_FREQ
                                         == 0):
                 self._data_saver.add(task_str, task.jacobian)
+
+        if self._sp.b_rf_contact == False:
+            self._tci_container.task_list["rfoot_pos"].ignore_floating_base()
+            self._tci_container.task_list["rfoot_ori"].ignore_floating_base()
+
+        if self._sp.b_lf_contact == False:
+            self._tci_container.task_list["lfoot_pos"].ignore_floating_base()
+            self._tci_container.task_list["lfoot_ori"].ignore_floating_base()
 
         self._ihwbc.w_hierarchy = np.array(w_hierarchy_list)
         for contact in self._tci_container.contact_list:

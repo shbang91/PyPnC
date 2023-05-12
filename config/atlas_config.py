@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import sys
+
 cwd = os.getcwd()
 sys.path.append(cwd)
 
@@ -37,13 +38,13 @@ class PnCConfig(object):
 #########################################
 class TowrPlusConfig(object):
     TOWR_PLUS = True
-    SOLUTION_YAML = cwd + "/data/atlas_forward_walk.yaml"
+    # SOLUTION_YAML = cwd + "/data/atlas_forward_walk.yaml"
     # SOLUTION_YAML = cwd + "/data/atlas_side_walk.yaml"
     # SOLUTION_YAML = cwd + "/data/atlas_turning.yaml"
     # SOLUTION_YAML = cwd + "/data/atlas_steer_walk.yaml"
 
     ## TODO:not verified yet ##
-    # SOLUTION_YAML = cwd + "/data/atlas_stair.yaml"
+    SOLUTION_YAML = cwd + "/data/atlas_stair.yaml"
     # SOLUTION_YAML = cwd + "/data/atlas_block.yaml"
     # SOLUTION_YAML = cwd + "/data/atlas_round_walk.yaml"
 
@@ -67,8 +68,8 @@ class WBCConfig(object):
     KP_COM = np.array([100., 100., 100])
     KD_COM = np.array([20., 20., 20.])
 
-    KP_PELVIS = np.array([100., 100., 100])
-    KD_PELVIS = np.array([10., 10., 10.])
+    KP_PELVIS = np.array([200., 200., 200])
+    KD_PELVIS = np.array([20., 20., 20.])
 
     KP_UPPER_BODY = 100.
     KD_UPPER_BODY = 10.
@@ -76,10 +77,10 @@ class WBCConfig(object):
     KP_HAND_POS = np.array([70., 70., 70.])
     KD_HAND_POS = np.array([5., 5., 5.])
 
-    KP_FOOT_POS = np.array([400., 400., 400.])
-    KD_FOOT_POS = np.array([40., 40., 40.])
-    KP_FOOT_ORI = np.array([400., 400., 400.])
-    KD_FOOT_ORI = np.array([40., 40., 40.])
+    KP_FOOT_POS = np.array([500., 500., 500.])
+    KD_FOOT_POS = np.array([50., 50., 50.])
+    KP_FOOT_ORI = np.array([500., 1000., 500.])
+    KD_FOOT_ORI = np.array([50., 50., 50.])
 
     # Regularization terms
     LAMBDA_Q_DDOT = 1e-8

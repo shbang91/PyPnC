@@ -9,6 +9,7 @@ class Task(abc.ABC):
     Usage:
         update_desired --> update_jacobian --> update_cmd
     """
+
     def __init__(self, robot, dim):
         self._robot = robot
         self._dim = dim
@@ -102,6 +103,9 @@ class Task(abc.ABC):
         self._pos_des = pos_des
         self._vel_des = vel_des
         self._acc_des = acc_des
+
+    def ignore_floating_base(self):
+        self._jacobian[:self._dim, :6] = np.zeros((self._dim, 6))
 
     @abc.abstractmethod
     def update_cmd(self):
