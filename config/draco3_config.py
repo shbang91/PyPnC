@@ -3,7 +3,7 @@ import numpy as np
 
 class SimConfig(object):
     CONTROLLER_DT = 0.01
-    N_SUBSTEP = 10
+    N_SUBSTEP = 5
     CAMERA_DT = 0.05
     KP = 0.
     KD = 0.
@@ -79,28 +79,37 @@ class WBCConfig(object):
 
 class WalkingConfig(object):
     # STAND
-    INIT_STAND_DUR = 1.0
+    # INIT_STAND_DUR = 1.0
+    INIT_STAND_DUR = 0.5
     RF_Z_MAX_TIME = 0.1
 
     COM_HEIGHT = 0.70  # m
-    SWING_HEIGHT = 0.03  # m
+    # SWING_HEIGHT = 0.03  # m
+    SWING_HEIGHT = 0.15  # m
 
     SWAYING_AMP = np.array([0., 0.08, 0.])
     SWAYING_FREQ = np.array([0., 0.3, 0.])
     # SWAYING_AMP = np.array([0., 0., 0.05])
     # SWAYING_FREQ = np.array([0., 0., 0.3])
 
+    # T_ADDITIONAL_INI_TRANS = 0.  # sec
+    # T_CONTACT_TRANS = 1.0
+    # T_SWING = 1.0
+    # PERCENTAGE_SETTLE = 0.9
+    # ALPHA_DS = 0.5
+
     T_ADDITIONAL_INI_TRANS = 0.  # sec
-    T_CONTACT_TRANS = 1.0
-    T_SWING = 1.0
+    T_CONTACT_TRANS = 0.3
+    T_SWING = 0.6
     PERCENTAGE_SETTLE = 0.9
     ALPHA_DS = 0.5
 
-    NOMINAL_FOOTWIDTH = 0.25
-    NOMINAL_FORWARD_STEP = 0.1
-    NOMINAL_BACKWARD_STEP = -0.1
+    # NOMINAL_FOOTWIDTH = 0.25
+    NOMINAL_FOOTWIDTH = 0.202
+    NOMINAL_FORWARD_STEP = 0.35
+    NOMINAL_BACKWARD_STEP = -0.3
     NOMINAL_TURN_RADIANS = np.pi / 10
-    NOMINAL_STRAFE_DISTANCE = 0.05
+    NOMINAL_STRAFE_DISTANCE = 0.2
 
 
 class WalkingState(object):

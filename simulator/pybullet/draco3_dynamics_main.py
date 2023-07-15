@@ -37,7 +37,7 @@ def set_initial_config(robot, joint_id):
     p.resetJointState(robot, joint_id["r_elbow_fe"], -np.pi / 2, 0.)
 
     # Lowerbody
-    hip_yaw_angle = 5
+    hip_yaw_angle = 0
     p.resetJointState(robot, joint_id["l_hip_aa"], np.radians(hip_yaw_angle),
                       0.)
     p.resetJointState(robot, joint_id["l_hip_fe"], -np.pi / 4, 0.)
@@ -70,14 +70,13 @@ if __name__ == "__main__":
 
     # Environment Setup
     p.connect(p.GUI)
-    p.resetDebugVisualizerCamera(
-        cameraDistance=1.0,
-        cameraYaw=120,
-        cameraPitch=-30,
-        cameraTargetPosition=[1, 0.5, 1.0])
+    p.resetDebugVisualizerCamera(cameraDistance=1.0,
+                                 cameraYaw=120,
+                                 cameraPitch=-30,
+                                 cameraTargetPosition=[1, 0.5, 1.0])
     p.setGravity(0, 0, -9.8)
-    p.setPhysicsEngineParameter(
-        fixedTimeStep=SimConfig.CONTROLLER_DT, numSubSteps=SimConfig.N_SUBSTEP)
+    p.setPhysicsEngineParameter(fixedTimeStep=SimConfig.CONTROLLER_DT,
+                                numSubSteps=SimConfig.N_SUBSTEP)
     if SimConfig.VIDEO_RECORD:
         video_dir = 'video/draco3_pnc'
         if os.path.exists(video_dir):
@@ -87,9 +86,10 @@ if __name__ == "__main__":
     # Create Robot, Ground
     p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 0)
     # robot = p.loadURDF(cwd + "/robot_model/draco3/draco3.urdf",
-    robot = p.loadURDF(cwd + "/robot_model/draco3/draco3_gripper_mesh_updated.urdf",
-                       SimConfig.INITIAL_POS_WORLD_TO_BASEJOINT,
-                       SimConfig.INITIAL_QUAT_WORLD_TO_BASEJOINT)
+    robot = p.loadURDF(
+        cwd + "/robot_model/draco3/draco3_gripper_mesh_updated.urdf",
+        SimConfig.INITIAL_POS_WORLD_TO_BASEJOINT,
+        SimConfig.INITIAL_QUAT_WORLD_TO_BASEJOINT)
 
     p.loadURDF(cwd + "/robot_model/ground/plane.urdf", [0, 0, 0])
     p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 1)
@@ -98,26 +98,24 @@ if __name__ == "__main__":
         SimConfig.INITIAL_QUAT_WORLD_TO_BASEJOINT, SimConfig.PRINT_ROBOT_INFO)
 
     # Add Gear constraint
-    c = p.createConstraint(
-        robot,
-        link_id['l_knee_fe_lp'],
-        robot,
-        link_id['l_knee_fe_ld'],
-        jointType=p.JOINT_GEAR,
-        jointAxis=[0, 1, 0],
-        parentFramePosition=[0, 0, 0],
-        childFramePosition=[0, 0, 0])
+    c = p.createConstraint(robot,
+                           link_id['l_knee_fe_lp'],
+                           robot,
+                           link_id['l_knee_fe_ld'],
+                           jointType=p.JOINT_GEAR,
+                           jointAxis=[0, 1, 0],
+                           parentFramePosition=[0, 0, 0],
+                           childFramePosition=[0, 0, 0])
     p.changeConstraint(c, gearRatio=-1, maxForce=500, erp=10)
 
-    c = p.createConstraint(
-        robot,
-        link_id['r_knee_fe_lp'],
-        robot,
-        link_id['r_knee_fe_ld'],
-        jointType=p.JOINT_GEAR,
-        jointAxis=[0, 1, 0],
-        parentFramePosition=[0, 0, 0],
-        childFramePosition=[0, 0, 0])
+    c = p.createConstraint(robot,
+                           link_id['r_knee_fe_lp'],
+                           robot,
+                           link_id['r_knee_fe_ld'],
+                           jointType=p.JOINT_GEAR,
+                           jointAxis=[0, 1, 0],
+                           parentFramePosition=[0, 0, 0],
+                           childFramePosition=[0, 0, 0])
     p.changeConstraint(c, gearRatio=-1, maxForce=500, erp=10)
 
     # Initial Config
@@ -169,6 +167,13 @@ if __name__ == "__main__":
         sensor_data['b_rf_contact'] = True if rf_height <= 0.01 else False
         sensor_data['b_lf_contact'] = True if lf_height <= 0.01 else False
 
+        # rf_pos = pybullet_util.get_link_iso(robot,
+        # link_id['r_foot_contact'])[:3, 3]
+        # lf_pos = pybullet_util.get_link_iso(robot,
+        # link_id['l_foot_contact'])[:3, 3]
+        # print("-------------------")
+        # print(rf_pos - lf_pos)
+
         # Get Keyboard Event
         keys = p.getKeyboardEvents()
         if pybullet_util.is_key_triggered(keys, '8'):
@@ -217,8 +222,9 @@ if __name__ == "__main__":
 
         # Save Image
         if (SimConfig.VIDEO_RECORD) and (count % SimConfig.RECORD_FREQ == 0):
-            frame = pybullet_util.get_camera_image(
-                [1., 0.5, 1.], 1.0, 120, -15, 0, 60., 1920, 1080, 0.1, 100.)
+            frame = pybullet_util.get_camera_image([1., 0.5, 1.], 1.0, 120,
+                                                   -15, 0, 60., 1920, 1080,
+                                                   0.1, 100.)
             frame = frame[:, :, [2, 1, 0]]  # << RGB to BGR
             filename = video_dir + '/step%06d.jpg' % jpg_count
             cv2.imwrite(filename, frame)
