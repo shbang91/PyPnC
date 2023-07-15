@@ -25,6 +25,7 @@ import pinocchio as pin
 
 import ipdb
 import pickle
+
 np.set_printoptions(precision=3)
 
 ######################## Key stroke ########################
@@ -401,18 +402,19 @@ if __name__ == "__main__":
 
             blue_can_pos = p.getBasePositionAndOrientation(blue_can)[0]
             blue_can_pos = np.array(blue_can_pos)
-            x_offset = 0.
+            x_offset = -0.1
             blue_can_pos[0] += x_offset
 
             ## -0.2 ~ 0.5
-            y_offset = -0.1
+            y_offset = 0.4
             blue_can_pos[1] += y_offset
 
-            z_offset = 0.0
+            z_offset = 0.6 - 0.025
             blue_can_pos[2] += z_offset
             ## Update target pos and quat here
             # lh_target_pos = np.array([xOffset + 0.01, 0.10, 0.38])
             lh_target_pos = np.array(blue_can_pos)
+            print(lh_target_pos)
             # lh_target_pos = np.copy(lh_pose_ini)
             # lh_target_pos[0] += 0.02
             lh_target_rot = np.dot(RIGHTUP_GRIPPER, x_rot(0.))
@@ -547,6 +549,9 @@ if __name__ == "__main__":
         pybullet_util.set_motor_trq(robot, joint_id, command['joint_trq'])
         # pybullet_util.set_motor_impedance(robot, joint_id, command,
         # SimConfig.KP, SimConfig.KD)
+
+        print("=========================================================")
+        print(command['joint_trq'])
 
         pybullet_util.set_motor_pos(robot, joint_id, gripper_command)
 
