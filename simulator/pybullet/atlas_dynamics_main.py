@@ -22,6 +22,7 @@ from util import util
 from util import liegroup
 
 import argparse
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--file", type=str)
 args = parser.parse_args()
@@ -81,6 +82,8 @@ if __name__ == "__main__":
         if os.path.exists(video_dir):
             shutil.rmtree(video_dir)
         os.makedirs(video_dir)
+
+    p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
 
     # Create Robot, Ground
     BASE_JOINT_POS = SimConfig.INITIAL_POS_WORLD_TO_BASEJOINT
@@ -151,6 +154,11 @@ if __name__ == "__main__":
         lf_height = pybullet_util.get_link_iso(robot, link_id['l_sole'])[2, 3]
         sensor_data['b_rf_contact'] = True if rf_height <= 0.01 else False
         sensor_data['b_lf_contact'] = True if lf_height <= 0.01 else False
+
+        # rf_pos = pybullet_util.get_link_iso(robot, link_id['r_sole'])[:3, 3]
+        # lf_pos = pybullet_util.get_link_iso(robot, link_id['l_sole'])[:3, 3]
+        # print("-------------------")
+        # print(rf_pos - lf_pos)
 
         # Get Keyboard Event
         keys = p.getKeyboardEvents()

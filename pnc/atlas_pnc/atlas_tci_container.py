@@ -7,6 +7,7 @@ from pnc.wbc.basic_contact import SurfaceContact
 
 
 class AtlasTCIContainer(TCIContainer):
+
     def __init__(self, robot):
         super(AtlasTCIContainer, self).__init__(robot)
 
@@ -24,6 +25,13 @@ class AtlasTCIContainer(TCIContainer):
         self._pelvis_ori_task.kp = WBCConfig.KP_PELVIS
         self._pelvis_ori_task.kd = WBCConfig.KD_PELVIS
         self._pelvis_ori_task.w_hierarchy = WBCConfig.W_PELVIS
+        # torso Task
+        self._torso_ori_task = BasicTask(robot, "LINK_ORI", 3, "utorso_com",
+                                         PnCConfig.SAVE_DATA)
+        self._torso_ori_task.kp = WBCConfig.KP_TORSO
+        self._torso_ori_task.kd = WBCConfig.KD_TORSO
+        self._torso_ori_task.w_hierarchy = WBCConfig.W_TORSO
+
         # Non leg related joints (18, so 18 + 6*2 = n_a)
         selected_joint = [
             "back_bkx", "back_bky", "back_bkz", "l_arm_elx", "l_arm_ely",
@@ -85,6 +93,7 @@ class AtlasTCIContainer(TCIContainer):
         self._task_list = {
             "com": self._com_task,
             "pelvis_ori": self._pelvis_ori_task,
+            "torso_ori": self._torso_ori_task,
             "upper_body": self._upper_body_task,
             "rfoot_pos": self._rfoot_pos_task,
             "lfoot_pos": self._lfoot_pos_task,
@@ -117,6 +126,10 @@ class AtlasTCIContainer(TCIContainer):
     @property
     def pelvis_ori_task(self):
         return self._pelvis_ori_task
+
+    @property
+    def torso_ori_task(self):
+        return self._torso_ori_task
 
     @property
     def upper_body_task(self):

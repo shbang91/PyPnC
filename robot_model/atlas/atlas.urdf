@@ -535,6 +535,13 @@
       <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
     </inertial>
   </link>
+  <link name="utorso_com">
+    <inertial>
+      <mass value="0.001"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
   <link name="r_clav">
     <inertial>
       <mass value="4.466"/>
@@ -1082,6 +1089,11 @@
     <origin rpy="0 -0 0" xyz="0.0111 0 0.0271"/>
     <parent link="pelvis"/>
     <child link="pelvis_com"/>
+  </joint>
+  <joint name="utorso_com_fixed" type="fixed">
+    <origin rpy="0 -0 0" xyz="-0.0622 0.0023 0.3157"/>
+    <parent link="utorso"/>
+    <child link="utorso_com"/>
   </joint>
   <joint name="l_arm_elx" type="revolute">
     <origin rpy="0 -0 0" xyz="0 -0.119 0.0092"/>

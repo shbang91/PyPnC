@@ -7,7 +7,7 @@ from pnc.planner.locomotion.dcm_planner.footstep import Footstep
 from pnc.wbc.manager.dcm_trajectory_manager import DCMTrajectoryManager
 from pnc.wbc.manager.task_hierarchy_manager import TaskHierarchyManager
 from pnc.wbc.manager.hand_trajectory_manager import HandTrajectoryManager
-from pnc.wbc.manager.floating_base_trajectory_manager import FloatingBaseTrajectoryManager
+from pnc.wbc.manager.floating_base_pelvis_trajectory_manager import FloatingBasePelvisTrajectoryManager
 from pnc.wbc.manager.foot_trajectory_manager import FootTrajectoryManager
 from pnc.wbc.manager.reaction_force_manager import ReactionForceManager
 from pnc.wbc.manager.upper_body_trajectory_manager import UpperBodyTrajectoryManager
@@ -23,6 +23,7 @@ from pnc.atlas_pnc.atlas_state_provider import AtlasStateProvider
 
 
 class AtlasControlArchitecture(ControlArchitecture):
+
     def __init__(self, robot):
         super(AtlasControlArchitecture, self).__init__(robot)
 
@@ -46,14 +47,14 @@ class AtlasControlArchitecture(ControlArchitecture):
         self._lfoot_tm.swing_height = WalkingConfig.SWING_HEIGHT
         self._upper_body_tm = UpperBodyTrajectoryManager(
             self._tci_container.upper_body_task, robot)
-        self._floating_base_tm = FloatingBaseTrajectoryManager(
-            self._tci_container.com_task, self._tci_container.pelvis_ori_task,
-            robot)
+        self._floating_base_pelvis_tm = FloatingBasePelvisTrajectoryManager(
+            self._tci_container.com_task, self._tci_container.torso_ori_task,
+            self._tci_container.pelvis_ori_task, robot)
 
-        self._dcm_tm = DCMTrajectoryManager(
-            self._dcm_planner, self._tci_container.com_task,
-            self._tci_container.pelvis_ori_task, self._robot, "l_sole",
-            "r_sole")
+        self._dcm_tm = DCMTrajectoryManager(self._dcm_planner,
+                                            self._tci_container.com_task,
+                                            self._tci_container.torso_ori_task,
+                                            self._robot, "l_sole", "r_sole")
         self._dcm_tm.nominal_com_height = WalkingConfig.COM_HEIGHT
         self._dcm_tm.t_additional_init_transfer = WalkingConfig.T_ADDITIONAL_INI_TRANS
         self._dcm_tm.t_contact_transition = WalkingConfig.T_CONTACT_TRANS
@@ -76,7 +77,7 @@ class AtlasControlArchitecture(ControlArchitecture):
             "rfoot": self._rfoot_tm,
             "lfoot": self._lfoot_tm,
             "upper_body": self._upper_body_tm,
-            "floating_base": self._floating_base_tm,
+            "floating_base": self._floating_base_pelvis_tm,
             "dcm": self._dcm_tm,
             "lhand": self._lhand_tm,
             "rhand": self._rhand_tm

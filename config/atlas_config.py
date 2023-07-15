@@ -37,7 +37,7 @@ class PnCConfig(object):
 ############### TOWR PLUS ###############
 #########################################
 class TowrPlusConfig(object):
-    TOWR_PLUS = True
+    TOWR_PLUS = False
     # SOLUTION_YAML = cwd + "/data/atlas_forward_walk.yaml"
     # SOLUTION_YAML = cwd + "/data/atlas_side_walk.yaml"
     # SOLUTION_YAML = cwd + "/data/atlas_turning.yaml"
@@ -58,6 +58,7 @@ class WBCConfig(object):
     # Task Hierarchy Weights
     W_COM = 10.0
     W_PELVIS = 20.0
+    W_TORSO = 20.0
     W_UPPER_BODY = 0.1
     W_CONTACT_FOOT = 60.0
     W_SWING_FOOT = 40.0
@@ -70,6 +71,9 @@ class WBCConfig(object):
 
     KP_PELVIS = np.array([200., 200., 200])
     KD_PELVIS = np.array([20., 20., 20.])
+
+    KP_TORSO = np.array([200., 200., 200])
+    KD_TORSO = np.array([20., 20., 20.])
 
     KP_UPPER_BODY = 100.
     KD_UPPER_BODY = 10.
@@ -102,16 +106,18 @@ class WalkingConfig(object):
     COM_HEIGHT = 1.02  # m
     # COM_HEIGHT = 0.9  # m
     # COM_HEIGHT = 0.766  # m
-    SWING_HEIGHT = 0.05  # m
+    # SWING_HEIGHT = 0.05  # m
+    SWING_HEIGHT = 0.10  # m
 
     T_ADDITIONAL_INI_TRANS = 0.  # sec
     T_CONTACT_TRANS = 0.45
-    T_SWING = 0.75
+    T_SWING = 0.65
     PERCENTAGE_SETTLE = 0.9
     ALPHA_DS = 0.5
 
-    NOMINAL_FOOTWIDTH = 0.25
-    NOMINAL_FORWARD_STEP = 0.15
+    # NOMINAL_FOOTWIDTH = 0.25
+    NOMINAL_FOOTWIDTH = 0.224
+    NOMINAL_FORWARD_STEP = 0.40
     NOMINAL_BACKWARD_STEP = -0.15
     NOMINAL_TURN_RADIANS = np.pi / 6
     NOMINAL_STRAFE_DISTANCE = 0.1

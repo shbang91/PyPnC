@@ -3,7 +3,7 @@ import numpy as np
 from config.atlas_config import WalkingConfig, WBCConfig, WalkingState, TowrPlusConfig
 from pnc.control_architecture import ControlArchitecture
 from pnc.wbc.manager.task_hierarchy_manager import TaskHierarchyManager
-from pnc.wbc.manager.floating_base_trajectory_manager import FloatingBaseTrajectoryManager
+from pnc.wbc.manager.floating_base_pelvis_trajectory_manager import FloatingBasePelvisTrajectoryManager
 from pnc.wbc.manager.foot_trajectory_manager import FootTrajectoryManager
 from pnc.wbc.manager.reaction_force_manager import ReactionForceManager
 from pnc.wbc.manager.upper_body_trajectory_manager import UpperBodyTrajectoryManager
@@ -16,6 +16,7 @@ from pnc.atlas_pnc.atlas_state_provider import AtlasStateProvider
 
 
 class AtlasTowrPlusControlArchitecture(ControlArchitecture):
+
     def __init__(self, robot):
         super().__init__(robot)
 
@@ -35,15 +36,15 @@ class AtlasTowrPlusControlArchitecture(ControlArchitecture):
         self._lfoot_tm.swing_height = WalkingConfig.SWING_HEIGHT
         self._upper_body_tm = UpperBodyTrajectoryManager(
             self._tci_container.upper_body_task, robot)
-        self._floating_base_tm = FloatingBaseTrajectoryManager(
-            self._tci_container.com_task, self._tci_container.pelvis_ori_task,
-            robot)
+        self._floating_base_pelvis_tm = FloatingBasePelvisTrajectoryManager(
+            self._tci_container.com_task, self._tci_container.torso_ori_task,
+            self._tci_container.pelvis_ori_task, robot)
 
         self._trajectory_managers = {
             "rfoot": self._rfoot_tm,
             "lfoot": self._lfoot_tm,
             "upper_body": self._upper_body_tm,
-            "floating_base": self._floating_base_tm,
+            "floating_base": self._floating_base_pelvis_tm,
         }
 
         # Initialize Hierarchy Manager
