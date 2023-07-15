@@ -9,6 +9,7 @@ from pnc.wbc.ihwbc.joint_integrator import JointIntegrator
 
 
 class Draco3Controller(object):
+
     def __init__(self, tci_container, robot):
         self._tci_container = tci_container
         self._robot = robot
@@ -72,7 +73,7 @@ class Draco3Controller(object):
                                    gravity)
         # Task, Contact, and Internal Constraint Setup
         w_hierarchy_list = []
-        for task in self._tci_container.task_list:
+        for [task_str, task] in self._tci_container.task_list.items():
             task.update_jacobian()
             task.update_cmd()
             w_hierarchy_list.append(task.w_hierarchy)
@@ -95,13 +96,14 @@ class Draco3Controller(object):
         if PnCConfig.SAVE_DATA:
             self._data_saver.add('joint_trq_cmd', joint_trq_cmd)
 
-        command = self._robot.create_cmd_ordered_dict(
-            joint_pos_cmd, joint_vel_cmd, joint_trq_cmd)
+        command = self._robot.create_cmd_ordered_dict(joint_pos_cmd,
+                                                      joint_vel_cmd,
+                                                      joint_trq_cmd)
         return command
 
     def first_visit(self):
         joint_pos_ini = self._robot.joint_positions
-        self._joint_integrator.initialize_states(
-            np.zeros(self._robot.n_a), joint_pos_ini)
+        self._joint_integrator.initialize_states(np.zeros(self._robot.n_a),
+                                                 joint_pos_ini)
 
         self._b_first_visit = False
