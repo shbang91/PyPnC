@@ -1,15 +1,18 @@
 import os
 import sys
+import ipdb
+
 cwd = os.getcwd()
 sys.path.append(cwd)
 import pickle
 
 import numpy as np
 import matplotlib
+
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
-from plot.helper import plot_task, plot_weights, plot_rf_z_max, plot_rf, plot_vector_traj
+from plot.helper import plot_task, plot_weights, plot_rf_z_max, plot_rf, plot_vector_traj, plot_joints
 
 tasks = [
     'com_pos', 'com_vel', 'torso_com_link_quat', 'torso_com_link_ang_vel',
@@ -25,6 +28,16 @@ weights = [
 ]
 
 rf_z = ['rf_z_max_r_foot_contact', 'rf_z_max_l_foot_contact']
+
+lfoot_label = [
+    'l_hip_ie', 'l_hip_aa', 'l_hip_fe', 'l_knee_fe_jp', 'l_knee_fe_jd',
+    'l_ankle_fe', 'l_ankle_ie'
+]
+
+rfoot_label = [
+    'r_hip_ie', 'r_hip_aa', 'r_hip_fe', 'r_knee_fe_jp', 'r_knee_fe_jd',
+    'r_ankle_fe', 'r_ankle_ie'
+]
 
 time = []
 
@@ -43,10 +56,22 @@ rf_z_max = dict()
 for topic in rf_z:
     rf_z_max[topic] = []
 
+joint_pos_cmd = []
+joint_vel_cmd = []
+joint_trq_cmd = []
+
+joint_pos_act = []
+joint_vel_act = []
+
+joint_label = []
+
 with open('data/pnc.pkl', 'rb') as file:
+    iter = 0
     while True:
         try:
             d = pickle.load(file)
+            if iter == 0:
+                joint_label = list(d['joint_pos_des'].keys())
             time.append(d['time'])
             phase.append(d['phase'])
             for topic in tasks:
@@ -57,6 +82,12 @@ with open('data/pnc.pkl', 'rb') as file:
             for topic in rf_z:
                 rf_z_max[topic].append(d[topic])
             rf_cmd.append(d['rf_cmd'])
+            joint_pos_act.append(list(d['joint_pos_act'].values()))
+            joint_vel_act.append(list(d['joint_vel_act'].values()))
+            joint_pos_cmd.append(list(d['joint_pos_des'].values()))
+            joint_vel_cmd.append(list(d['joint_vel_des'].values()))
+            joint_trq_cmd.append(list(d['joint_trq_des'].values()))
+
         except EOFError:
             break
 
@@ -66,6 +97,12 @@ for k, v in act.items():
     act[k] = np.stack(v, axis=0)
 rf_cmd = np.stack(rf_cmd, axis=0)
 phase = np.stack(phase, axis=0)
+
+joint_pos_act = np.stack(joint_pos_act, axis=0)
+joint_vel_act = np.stack(joint_vel_act, axis=0)
+joint_pos_cmd = np.stack(joint_pos_cmd, axis=0)
+joint_vel_cmd = np.stack(joint_vel_cmd, axis=0)
+joint_trq_cmd = np.stack(joint_trq_cmd, axis=0)
 
 ## =============================================================================
 ## Plot Task
@@ -102,6 +139,10 @@ plot_task(time, des['r_foot_contact_quat'], act['r_foot_contact_quat'],
 ## Plot WBC Solutions
 ## =============================================================================
 plot_rf(time, rf_cmd, phase)
+plot_joints(joint_label, rfoot_label, time, joint_pos_cmd, joint_pos_act,
+            joint_vel_cmd, joint_vel_act, joint_trq_cmd, phase, "rfoot")
+plot_joints(joint_label, lfoot_label, time, joint_pos_cmd, joint_pos_act,
+            joint_vel_cmd, joint_vel_act, joint_trq_cmd, phase, "lfoot")
 
 ## =============================================================================
 ## Plot Weights and Max Reaction Force Z

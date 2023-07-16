@@ -83,6 +83,8 @@ if __name__ == "__main__":
             shutil.rmtree(video_dir)
         os.makedirs(video_dir)
 
+    p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
+
     # Create Robot, Ground
     p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 0)
     # robot = p.loadURDF(cwd + "/robot_model/draco3/draco3.urdf",

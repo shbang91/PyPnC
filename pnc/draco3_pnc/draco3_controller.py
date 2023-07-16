@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 
 from util import util
 from pnc.data_saver import DataSaver
@@ -93,12 +94,21 @@ class Draco3Controller(object):
             joint_acc_cmd, self._robot.joint_velocities,
             self._robot.joint_positions)
 
-        if PnCConfig.SAVE_DATA:
-            self._data_saver.add('joint_trq_cmd', joint_trq_cmd)
+        # self._data_saver.add('joint_pos_des', joint_pos_cmd)
+        # self._data_saver.add('joint_vel_des', joint_vel_cmd)
+        # self._data_saver.add('joint_trq_cmd', joint_trq_cmd)
 
         command = self._robot.create_cmd_ordered_dict(joint_pos_cmd,
                                                       joint_vel_cmd,
                                                       joint_trq_cmd)
+        if PnCConfig.SAVE_DATA:
+            self._data_saver.add('joint_pos_des',
+                                 copy.deepcopy(command['joint_pos']))
+            self._data_saver.add('joint_vel_des',
+                                 copy.deepcopy(command['joint_vel']))
+            self._data_saver.add('joint_trq_des',
+                                 copy.deepcopy(command['joint_trq']))
+
         return command
 
     def first_visit(self):

@@ -1,15 +1,20 @@
 import numpy as np
+import copy
 
 from config.draco3_config import PnCConfig
 from util import util
 from pnc.draco3_pnc.draco3_state_provider import Draco3StateProvider
 
+from pnc.data_saver import DataSaver
+
 
 class Draco3StateEstimator(object):
+
     def __init__(self, robot):
         super(Draco3StateEstimator, self).__init__()
         self._robot = robot
         self._sp = Draco3StateProvider(self._robot)
+        self._data_saver = DataSaver()
 
     def initialize(self, sensor_data):
         self._sp.nominal_joint_pos = sensor_data["joint_pos"]
@@ -31,6 +36,19 @@ class Draco3StateEstimator(object):
 
         # Update Divergent Component of Motion
         self._update_dcm()
+
+        # change pybullet joint order to dynamics library model order
+        sensor_data_pos_vel = self._robot.create_sensor_data_ordered_dict(
+            copy.deepcopy(sensor_data['joint_pos']),
+            copy.deepcopy(sensor_data['joint_vel']))
+
+        if PnCConfig.SAVE_DATA:
+            self._data_saver.add(
+                'joint_pos_act',
+                copy.deepcopy(sensor_data_pos_vel['joint_pos']))
+            self._data_saver.add(
+                'joint_vel_act',
+                copy.deepcopy(sensor_data_pos_vel['joint_vel']))
 
     def _update_dcm(self):
         com_pos = self._robot.get_com_pos()
