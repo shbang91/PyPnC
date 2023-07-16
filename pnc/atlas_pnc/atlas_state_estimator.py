@@ -9,6 +9,7 @@ from pnc.data_saver import DataSaver
 
 
 class AtlasStateEstimator(object):
+
     def __init__(self, robot):
         super(AtlasStateEstimator, self).__init__()
         self._robot = robot
@@ -35,6 +36,11 @@ class AtlasStateEstimator(object):
 
         # Update Divergent Component of Motion
         self._update_dcm()
+
+        # change pybullet joint order to dynamics library model order
+        sensor_data_pos_vel = self._robot.create_sensor_data_ordered_dict(
+            copy.deepcopy(sensor_data['joint_pos']),
+            copy.deepcopy(sensor_data['joint_vel']))
 
         ## save data
         if PnCConfig.SAVE_DATA and (self._sp.count % PnCConfig.SAVE_FREQ == 0):

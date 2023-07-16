@@ -127,6 +127,17 @@ class PinocchioRobotSystem(RobotSystem):
 
         return command
 
+    def create_sensor_data_ordered_dict(self, joint_pos_dict, joint_vel_dict):
+        sensor_data = OrderedDict()
+        sensor_data["joint_pos"] = OrderedDict()
+        sensor_data["joint_vel"] = OrderedDict()
+
+        for k in self._joint_id.keys():
+            sensor_data["joint_pos"][k] = joint_pos_dict[k]
+            sensor_data["joint_vel"][k] = joint_vel_dict[k]
+
+        return sensor_data
+
     def update_system(self,
                       base_com_pos,
                       base_com_quat,
