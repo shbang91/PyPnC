@@ -3,7 +3,7 @@ import numpy as np
 
 class SimConfig(object):
     CONTROLLER_DT = 0.01
-    N_SUBSTEP = 5
+    N_SUBSTEP = 10
     CAMERA_DT = 0.05
     KP = 0.
     KD = 0.
@@ -54,10 +54,10 @@ class WBCConfig(object):
     # 'r_wrist_pitch'
     # ]
     KP_UPPER_BODY = np.array([
-        40., 100., 100., 100., 50., 40., 50., 100., 100., 100., 50., 40., 50.
+        100., 100., 100., 100., 50., 40., 50., 100., 100., 100., 50., 40., 50.
     ])
     KD_UPPER_BODY = np.array(
-        [2., 8., 8., 8., 3., 2., 3., 8., 8., 8., 3., 2., 3.])
+        [10., 8., 8., 8., 3., 2., 3., 8., 8., 8., 3., 2., 3.])
 
     KP_FOOT_POS = np.array([300., 300., 300.])
     KD_FOOT_POS = np.array([30., 30., 30.])
@@ -83,9 +83,9 @@ class WalkingConfig(object):
     INIT_STAND_DUR = 0.5
     RF_Z_MAX_TIME = 0.1
 
-    COM_HEIGHT = 0.70  # m
+    COM_HEIGHT = 0.67  # m
     # SWING_HEIGHT = 0.03  # m
-    SWING_HEIGHT = 0.15  # m
+    SWING_HEIGHT = 0.20  # m
 
     SWAYING_AMP = np.array([0., 0.08, 0.])
     SWAYING_FREQ = np.array([0., 0.3, 0.])
@@ -99,17 +99,17 @@ class WalkingConfig(object):
     # ALPHA_DS = 0.5
 
     T_ADDITIONAL_INI_TRANS = 0.  # sec
-    T_CONTACT_TRANS = 0.3
+    T_CONTACT_TRANS = 0.35
     T_SWING = 0.6
     PERCENTAGE_SETTLE = 0.9
     ALPHA_DS = 0.5
 
     # NOMINAL_FOOTWIDTH = 0.25
     NOMINAL_FOOTWIDTH = 0.202
-    NOMINAL_FORWARD_STEP = 0.35
-    NOMINAL_BACKWARD_STEP = -0.3
+    NOMINAL_FORWARD_STEP = 0.40
+    NOMINAL_BACKWARD_STEP = -0.40
     NOMINAL_TURN_RADIANS = np.pi / 10
-    NOMINAL_STRAFE_DISTANCE = 0.2
+    NOMINAL_STRAFE_DISTANCE = 0.4
 
 
 class WalkingState(object):

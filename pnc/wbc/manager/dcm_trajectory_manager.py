@@ -17,6 +17,7 @@ class DCMTransferType(object):
 
 
 class DCMTrajectoryManager(object):
+
     def __init__(self, dcm_planner, com_task, base_ori_task, robot, lfoot_id,
                  rfoot_id):
         self._dcm_planner = dcm_planner
@@ -240,12 +241,12 @@ class DCMTrajectoryManager(object):
 
     def walk_backward(self):
         self._reset_idx_and_clear_footstep_list()
-        self._populate_walk_forward(3, self._nominal_backward_step)
+        self._populate_walk_forward(2, self._nominal_backward_step)
         self._alternate_leg()
 
     def strafe_left(self):
         self._reset_idx_and_clear_footstep_list()
-        self._populate_strafe(5, self._nominal_strafe_distance)
+        self._populate_strafe(2, self._nominal_strafe_distance)
 
     def strafe_right(self):
         self._reset_idx_and_clear_footstep_list()
