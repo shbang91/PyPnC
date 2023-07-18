@@ -45,7 +45,7 @@ foreach(example atlas_half_step atlas_one_step atlas_two_step atlas_three_step
                 valkyrie_forward_walk valkyrie_turning
                 valkyrie_round_walk valkyrie_steer_walk
                 valkyrie_slope
-                nao_forward_walk nao_side_walk)
+                nao_forward_walk nao_side_walk draco3_stair)
 
     add_executable(${example} simulator/towr_plus/${example}.cpp)
     target_link_libraries(${example}
