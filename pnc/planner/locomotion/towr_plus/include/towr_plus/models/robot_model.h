@@ -75,6 +75,7 @@ struct RobotModel {
     Atlas,    ///< Boston Dynamic's Humanoid
     Valkyrie, ///< Nasa's Humanoid
     Nao,
+    Draco3,
     ROBOT_COUNT
   };
 
@@ -88,7 +89,8 @@ struct RobotModel {
 const static std::map<RobotModel::Robot, std::string> robot_names = {
     {RobotModel::Atlas, "Atlas"},
     {RobotModel::Valkyrie, "Valkyrie"},
-    {RobotModel::Nao, "Nao"}};
+    {RobotModel::Nao, "Nao"},
+    {RobotModel::Draco3, "Draco3"}};
 
 } /* namespace towr_plus */
 

@@ -33,6 +33,7 @@ Modified by Junhyeok Ahn (junhyeokahn91@gmail.com) for towr+
 
 #include <stdio.h>
 #include <towr_plus/models/examples/atlas_model.h>
+#include <towr_plus/models/examples/draco3_model.h>
 #include <towr_plus/models/examples/nao_model.h>
 #include <towr_plus/models/examples/valkyrie_model.h>
 #include <towr_plus/models/robot_model.h>
@@ -54,6 +55,10 @@ RobotModel::RobotModel(Robot robot) {
   case Nao:
     dynamic_model_ = std::make_shared<NaoDynamicModel>();
     kinematic_model_ = std::make_shared<NaoKinematicModel>();
+    break;
+  case Draco3:
+    dynamic_model_ = std::make_shared<Draco3DynamicModel>();
+    kinematic_model_ = std::make_shared<Draco3KinematicModel>();
     break;
   default:
     assert(false); // Error: Robot model not implemented.
