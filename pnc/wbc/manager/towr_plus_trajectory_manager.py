@@ -15,6 +15,7 @@ class TowrPlusTrajectoryManager(object):
     Usage:
         -> update_desried()
     """
+
     def __init__(self, robot, tci_container, fm, hm, file):
         self._robot = robot
         self._tci_container = tci_container
@@ -91,7 +92,7 @@ class TowrPlusTrajectoryManager(object):
             base_ang_vel = util.euler_rates_to_ang_vel(
                 self._base_ang[self._iter, 0:3], self._base_ang[self._iter,
                                                                 3:6])
-            self._tci_container.pelvis_ori_task.update_desired(
+            self._tci_container.torso_ori_task.update_desired(
                 base_ang_quat, base_ang_vel, np.zeros(3))
 
             ## Right foot

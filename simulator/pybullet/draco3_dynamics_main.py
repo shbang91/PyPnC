@@ -21,6 +21,14 @@ from util import pybullet_util
 from util import util
 from util import liegroup
 
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--file", type=str)
+args = parser.parse_args()
+
+file = args.file
+
 gripper_joints = [
     "left_ezgripper_knuckle_palm_L1_1", "left_ezgripper_knuckle_L1_L2_1",
     "left_ezgripper_knuckle_palm_L1_2", "left_ezgripper_knuckle_L1_L2_2",
@@ -84,6 +92,11 @@ if __name__ == "__main__":
         os.makedirs(video_dir)
 
     p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
+
+    if file == "data/draco3_stair.yaml":
+        stair = p.loadURDF(cwd + "/robot_model/ground/stair.urdf",
+                           [0.20, 0, 0.],
+                           useFixedBase=True)
 
     # Create Robot, Ground
     p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 0)
@@ -174,7 +187,8 @@ if __name__ == "__main__":
         # lf_pos = pybullet_util.get_link_iso(robot,
         # link_id['l_foot_contact'])[:3, 3]
         # print("-------------------")
-        # print(rf_pos - lf_pos)
+        # print(lf_pos)
+        # print(rf_pos)
 
         # Get Keyboard Event
         keys = p.getKeyboardEvents()

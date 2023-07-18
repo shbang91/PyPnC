@@ -14,6 +14,7 @@ class MetaSingleton(type):
 
 
 class Draco3StateProvider(metaclass=MetaSingleton):
+
     def __init__(self, robot):
         self._robot = robot
         self._nominal_joint_pos = OrderedDict()
@@ -25,6 +26,7 @@ class Draco3StateProvider(metaclass=MetaSingleton):
         self._dcm_vel = np.zeros(3)
         self._b_rf_contact = True
         self._b_lf_contact = True
+        self._count = 0
 
     @property
     def nominal_joint_pos(self):
@@ -98,3 +100,11 @@ class Draco3StateProvider(metaclass=MetaSingleton):
     @b_lf_contact.setter
     def b_lf_contact(self, value):
         self._b_lf_contact = value
+
+    @property
+    def count(self):
+        return self._count
+
+    @count.setter
+    def count(self, value):
+        self._count = value

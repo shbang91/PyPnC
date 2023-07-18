@@ -1,5 +1,6 @@
 import os
 import sys
+
 cwd = os.getcwd()
 sys.path.append(cwd)
 import time, math
@@ -7,16 +8,18 @@ import copy
 
 import pybullet as p
 
-from config.draco3_config import PnCConfig
+from config.draco3_config import PnCConfig, TowrPlusConfig
 from pnc.interface import Interface
 from pnc.draco3_pnc.draco3_interrupt_logic import Draco3InterruptLogic
 from pnc.draco3_pnc.draco3_state_provider import Draco3StateProvider
 from pnc.draco3_pnc.draco3_state_estimator import Draco3StateEstimator
 from pnc.draco3_pnc.draco3_control_architecture import Draco3ControlArchitecture
+from pnc.draco3_pnc.draco3_towr_plus_control_architecture import Draco3TowrPlusControlArchitecture
 from pnc.data_saver import DataSaver
 
 
 class Draco3Interface(Interface):
+
     def __init__(self):
         super(Draco3Interface, self).__init__()
 
@@ -33,9 +36,19 @@ class Draco3Interface(Interface):
         else:
             raise ValueError("wrong dynamics library")
 
+        print("total mass: ", self._robot.total_mass)
         self._sp = Draco3StateProvider(self._robot)
         self._se = Draco3StateEstimator(self._robot)
-        self._control_architecture = Draco3ControlArchitecture(self._robot)
+        # if (TowrPlusConfig.TOWR_PLUS):
+        # self._control_architecture = Draco3TowrPlusControlArchitecture(
+        # self._robot)
+        # else:
+        # self._control_architecture = Draco3ControlArchitecture(self._robot)
+        self._control_architecture = Draco3TowrPlusControlArchitecture(
+            self._robot
+        ) if TowrPlusConfig.TOWR_PLUS else Draco3ControlArchitecture(
+            self._robot)
+
         self._interrupt_logic = Draco3InterruptLogic(
             self._control_architecture)
         if PnCConfig.SAVE_DATA:
@@ -77,6 +90,7 @@ class Draco3Interface(Interface):
         self._sp.curr_time = self._running_time
         self._sp.prev_state = self._control_architecture.prev_state
         self._sp.state = self._control_architecture.state
+        self._sp.count = self._count
 
         return copy.deepcopy(command)
 

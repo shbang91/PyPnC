@@ -1,4 +1,9 @@
 import numpy as np
+import os
+import sys
+
+cwd = os.getcwd()
+sys.path.append(cwd)
 
 
 class SimConfig(object):
@@ -28,6 +33,19 @@ class PnCConfig(object):
     PRINT_ROBOT_INFO = SimConfig.PRINT_ROBOT_INFO
 
 
+class TowrPlusConfig(object):
+    TOWR_PLUS = True
+    # SOLUTION_YAML = cwd + "/data/draco3_forward_walk.yaml"
+    # SOLUTION_YAML = cwd + "/data/draco3_side_walk.yaml"
+    # SOLUTION_YAML = cwd + "/data/draco3_turning.yaml"
+    # SOLUTION_YAML = cwd + "/data/draco3_steer_walk.yaml"
+
+    ## TODO:not verified yet ##
+    SOLUTION_YAML = cwd + "/data/draco3_stair.yaml"
+    # SOLUTION_YAML = cwd + "/data/draco3_block.yaml"
+    # SOLUTION_YAML = cwd + "/data/draco3_round_walk.yaml"
+
+
 class WBCConfig(object):
     VERBOSE = True
 
@@ -35,18 +53,18 @@ class WBCConfig(object):
     RF_Z_MAX = 1000.0
 
     # Task Hierarchy Weights
-    W_COM = 80.0
-    W_TORSO = 80.0
+    W_COM = 30.0
+    W_TORSO = 30.0
     W_UPPER_BODY = 20.0
     W_CONTACT_FOOT = 60.0
-    W_SWING_FOOT = 40.0
+    W_SWING_FOOT = 80.0
 
     # Task Gains
-    KP_COM = np.array([400., 400., 400])
-    KD_COM = np.array([20., 20., 20.])
+    KP_COM = np.array([1000., 1000., 1000])
+    KD_COM = np.array([100., 100., 100.])
 
-    KP_TORSO = np.array([100., 100., 100])
-    KD_TORSO = np.array([10., 10., 10.])
+    KP_TORSO = np.array([1000., 1000., 1000])
+    KD_TORSO = np.array([100., 100., 100.])
 
     # ['neck_pitch', 'l_shoulder_fe', 'l_shoulder_aa', 'l_shoulder_ie',
     # 'l_elbow_fe', 'l_wrist_ps', 'l_wrist_pitch', 'r_shoulder_fe',
@@ -57,12 +75,12 @@ class WBCConfig(object):
         100., 100., 100., 100., 50., 40., 50., 100., 100., 100., 50., 40., 50.
     ])
     KD_UPPER_BODY = np.array(
-        [10., 8., 8., 8., 3., 2., 3., 8., 8., 8., 3., 2., 3.])
+        [20., 8., 8., 8., 3., 2., 3., 8., 8., 8., 3., 2., 3.])
 
-    KP_FOOT_POS = np.array([300., 300., 300.])
-    KD_FOOT_POS = np.array([30., 30., 30.])
-    KP_FOOT_ORI = np.array([300., 300., 300.])
-    KD_FOOT_ORI = np.array([30., 30., 30.])
+    KP_FOOT_POS = np.array([500., 500., 500.])
+    KD_FOOT_POS = np.array([50., 50., 50.])
+    KP_FOOT_ORI = np.array([500., 500., 500.])
+    KD_FOOT_ORI = np.array([50., 50., 50.])
 
     # Regularization terms
     LAMBDA_Q_DDOT = 1e-8

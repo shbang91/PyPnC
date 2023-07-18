@@ -7,6 +7,7 @@ from config.draco3_config import PnCConfig, WBCConfig
 from pnc.wbc.ihwbc.ihwbc import IHWBC
 from pnc.wbc.ihwbc.ihwbc2 import IHWBC2
 from pnc.wbc.ihwbc.joint_integrator import JointIntegrator
+from pnc.draco3_pnc.draco3_state_provider import Draco3StateProvider
 
 
 class Draco3Controller(object):
@@ -56,6 +57,7 @@ class Draco3Controller(object):
         self._joint_integrator.joint_pos_limit = self._robot.joint_pos_limit
         self._joint_integrator.joint_vel_limit = self._robot.joint_vel_limit
 
+        self._sp = Draco3StateProvider()
         self._b_first_visit = True
 
         if PnCConfig.SAVE_DATA:
@@ -79,6 +81,15 @@ class Draco3Controller(object):
             task.update_cmd()
             w_hierarchy_list.append(task.w_hierarchy)
         self._ihwbc.w_hierarchy = np.array(w_hierarchy_list)
+
+        if self._sp.b_rf_contact == False:
+            self._tci_container.task_list["rfoot_pos"].ignore_floating_base()
+            self._tci_container.task_list["rfoot_ori"].ignore_floating_base()
+
+        if self._sp.b_lf_contact == False:
+            self._tci_container.task_list["lfoot_pos"].ignore_floating_base()
+            self._tci_container.task_list["lfoot_ori"].ignore_floating_base()
+
         for contact in self._tci_container.contact_list:
             contact.update_contact()
         for internal_constraint in self._tci_container.internal_constraint_list:
