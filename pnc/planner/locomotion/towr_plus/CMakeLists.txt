@@ -19,6 +19,8 @@ add_library(towr_plus SHARED
   src/valkyrie_composite_rigid_body_inertia.cc
   src/nao_crbi_helper.c
   src/nao_composite_rigid_body_inertia.cc
+  src/draco3_crbi_helper.c
+  src/draco3_composite_rigid_body_inertia.cc
   # constraints
   src/time_discretization_constraint.cc
   src/base_motion_constraint.cc

@@ -2,7 +2,7 @@
 
 #include <towr_plus/models/composite_rigid_body_dynamics.h>
 #include <towr_plus/models/endeffector_mappings.h>
-#include <towr_plus/models/examples/atlas_composite_rigid_body_inertia.h>
+#include <towr_plus/models/examples/draco3_composite_rigid_body_inertia.h>
 #include <towr_plus/models/kinematic_model.h>
 
 namespace towr_plus {
@@ -31,7 +31,7 @@ class Draco3DynamicModel : public CompositeRigidBodyDynamics {
 public:
   Draco3DynamicModel()
       : CompositeRigidBodyDynamics(
-            36.5222, 2, std::make_shared<AtlasCompositeRigidBodyInertia>()) {}
+            36.5222, 2, std::make_shared<Draco3CompositeRigidBodyInertia>()) {}
 };
 
 } /* namespace towr_plus */
