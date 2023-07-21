@@ -50,7 +50,7 @@ class WBCConfig(object):
     VERBOSE = True
 
     # Max normal force per contact
-    RF_Z_MAX = 1000.0
+    RF_Z_MAX = 400.0
 
     # Task Hierarchy Weights
     W_COM = 30.0
