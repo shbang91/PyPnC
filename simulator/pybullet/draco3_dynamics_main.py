@@ -78,10 +78,10 @@ if __name__ == "__main__":
 
     # Environment Setup
     p.connect(p.GUI)
-    p.resetDebugVisualizerCamera(cameraDistance=1.0,
-                                 cameraYaw=120,
+    p.resetDebugVisualizerCamera(cameraDistance=1.5,
+                                 cameraYaw=70,
                                  cameraPitch=-30,
-                                 cameraTargetPosition=[1, 0.5, 1.0])
+                                 cameraTargetPosition=[0.9, -0.5, 1.0])
     p.setGravity(0, 0, -9.8)
     p.setPhysicsEngineParameter(fixedTimeStep=SimConfig.CONTROLLER_DT,
                                 numSubSteps=SimConfig.N_SUBSTEP)
@@ -238,9 +238,9 @@ if __name__ == "__main__":
 
         # Save Image
         if (SimConfig.VIDEO_RECORD) and (count % SimConfig.RECORD_FREQ == 0):
-            frame = pybullet_util.get_camera_image([1., 0.5, 1.], 1.0, 120,
-                                                   -15, 0, 60., 1920, 1080,
-                                                   0.1, 100.)
+            frame = pybullet_util.get_camera_image([0.9, -0.5, 1.], 2, 70, -30,
+                                                   0, 60., 1920, 1080, 0.1,
+                                                   100.)
             frame = frame[:, :, [2, 1, 0]]  # << RGB to BGR
             filename = video_dir + '/step%06d.jpg' % jpg_count
             cv2.imwrite(filename, frame)
