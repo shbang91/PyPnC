@@ -106,6 +106,10 @@ class Draco3TowrPlusControlArchitecture(ControlArchitecture):
         # Initialize State Provider
         self._sp = Draco3StateProvider()
 
+        # set des rf
+        self._tci_container.des_rf[5] = robot._total_mass * 9.81 / 2.
+        self._tci_container.des_rf[11] = robot._total_mass * 9.81 / 2.
+
     def get_command(self):
         if (self._sp.count < 150):
             if self._b_state_first_visit:

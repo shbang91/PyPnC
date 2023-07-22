@@ -105,6 +105,11 @@ class Draco3TCIContainer(TCIContainer):
         self._rolling_joint_constraint = Draco3RollingJointConstraint(robot)
         self._internal_constraint_list = [self._rolling_joint_constraint]
 
+        # ======================================================================
+        # reaction force container
+        # ======================================================================
+        self._desired_reaction_force = np.zeros(12)
+
     @property
     def com_task(self):
         return self._com_task
@@ -148,3 +153,11 @@ class Draco3TCIContainer(TCIContainer):
     @property
     def contact_list(self):
         return self._contact_list
+
+    @property
+    def des_rf(self):
+        return self._desired_reaction_force
+
+    @des_rf.setter
+    def des_rf(self, val):
+        self_desired_reaction_force = val

@@ -95,7 +95,7 @@ if __name__ == "__main__":
 
     if file == "data/draco3_stair.yaml":
         stair = p.loadURDF(cwd + "/robot_model/ground/stair.urdf",
-                           [0.28, 0, 0.],
+                           [0.30, 0, 0.],
                            useFixedBase=True)
 
     # Create Robot, Ground

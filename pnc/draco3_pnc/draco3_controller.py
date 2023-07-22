@@ -42,6 +42,7 @@ class Draco3Controller(object):
         self._sf[0:6, 0:6] = np.eye(6)
 
         self._ihwbc = IHWBC(self._sf, self._sa, self._sv, PnCConfig.SAVE_DATA)
+        self._ihwbc.w_rf = WBCConfig.W_rf
         if WBCConfig.B_TRQ_LIMIT:
             self._ihwbc.trq_limit = np.dot(self._sa[:, 6:],
                                            self._robot.joint_trq_limit)
@@ -97,7 +98,8 @@ class Draco3Controller(object):
         # WBC commands
         joint_trq_cmd, joint_acc_cmd, rf_cmd = self._ihwbc.solve(
             self._tci_container.task_list, self._tci_container.contact_list,
-            self._tci_container.internal_constraint_list)
+            self._tci_container.internal_constraint_list,
+            self._tci_container.des_rf)
         joint_trq_cmd = np.dot(self._sa[:, 6:].transpose(), joint_trq_cmd)
         joint_acc_cmd = np.dot(self._sa[:, 6:].transpose(), joint_acc_cmd)
         # Double integration

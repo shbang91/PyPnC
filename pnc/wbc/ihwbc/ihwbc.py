@@ -16,6 +16,7 @@ class IHWBC(object):
     Usage:
         update_setting --> solve
     """
+
     def __init__(self, sf, sa, sv, data_save=False):
 
         self._n_q_dot = sa.shape[1]
@@ -33,7 +34,7 @@ class IHWBC(object):
         self._trq_limit = None
         self._lambda_q_ddot = 0.
         self._lambda_rf = 0.
-        self._w_rf = 0.
+        self._w_rf = np.zeros(12)
         self._w_hierarchy = 0.
 
         self._b_data_save = data_save
@@ -188,10 +189,11 @@ class IHWBC(object):
             assert uf_mat.shape[1] == contact_jacobian.shape[0]
             dim_cone_constraint, dim_contacts = uf_mat.shape
 
-            cost_rf_mat = (self._lambda_rf + self._w_rf) * np.eye(dim_contacts)
+            cost_rf_mat = self._lambda_rf * np.eye(dim_contacts) + np.diag(
+                self._w_rf)
             if rf_des is None:
                 rf_des = np.zeros(dim_contacts)
-            cost_rf_vec = -self._w_rf * np.copy(rf_des)
+            cost_rf_vec = -np.dot(np.diag(self._w_rf), np.copy(rf_des))
 
             cost_mat = np.array(block_diag(
                 cost_t_mat, cost_rf_mat))  # (nqdot+nc, nqdot+nc)

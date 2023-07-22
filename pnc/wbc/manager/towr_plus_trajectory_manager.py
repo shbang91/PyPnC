@@ -128,6 +128,14 @@ class TowrPlusTrajectoryManager(object):
                 lfoot_ang_quat, lfoot_ang_vel, np.zeros(3))
 
             ## TODO:contact wrench task update
+            self._tci_container.des_rf[:3] = self._ee_wrench_ang[
+                FootSide.RIGHT][self._iter, 0:3]
+            self._tci_container.des_rf[3:6] = self._ee_wrench_lin[
+                FootSide.RIGHT][self._iter, 0:3]
+            self._tci_container.des_rf[6:9] = self._ee_wrench_ang[
+                FootSide.LEFT][self._iter, 0:3]
+            self._tci_container.des_rf[9:12] = self._ee_wrench_lin[
+                FootSide.LEFT][self._iter, 0:3]
 
             ## initialize reaction force managers & foot task hierarchy managers
             if self._iter in [

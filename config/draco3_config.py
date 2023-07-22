@@ -42,6 +42,7 @@ class TowrPlusConfig(object):
 
     ## TODO:not verified yet ##
     SOLUTION_YAML = cwd + "/data/draco3_stair.yaml"
+    # SOLUTION_YAML = cwd + "/data/draco3_stair_step_30cm.yaml"
     # SOLUTION_YAML = cwd + "/data/draco3_block.yaml"
     # SOLUTION_YAML = cwd + "/data/draco3_round_walk.yaml"
 
@@ -60,8 +61,8 @@ class WBCConfig(object):
     W_SWING_FOOT = 80.0
 
     # Task Gains
-    KP_COM = np.array([1000., 1000., 500])
-    KD_COM = np.array([100., 100., 50.])
+    KP_COM = np.array([1000., 1000., 1000])
+    KD_COM = np.array([100., 100., 120.])
 
     # KP_TORSO = np.array([1000., 1000., 1000])
     # KD_TORSO = np.array([100., 100., 100.])
@@ -80,11 +81,11 @@ class WBCConfig(object):
     # [20., 8., 8., 8., 3., 2., 3., 8., 8., 8., 3., 2., 3.])
 
     KP_UPPER_BODY = np.array([
-        1000., 1000., 1000., 1000., 1000., 500., 500., 1000., 1000., 1000.,
-        1000., 500., 500.
+        1000., 1000., 1000., 1000., 1000., 100., 100., 1000., 1000., 1000.,
+        1000., 100., 100.
     ])
     KD_UPPER_BODY = np.array(
-        [100., 16., 16., 16., 6., 4., 6., 16., 16., 16., 6., 4., 6.])
+        [100., 20., 20., 20., 20., 10., 10., 20., 20., 20., 20., 10., 10.])
 
     KP_FOOT_POS = np.array([500., 500., 500.])
     KD_FOOT_POS = np.array([50., 50., 50.])
@@ -93,7 +94,11 @@ class WBCConfig(object):
 
     # Regularization terms
     LAMBDA_Q_DDOT = 1e-8
-    LAMBDA_RF = 1e-7
+    # LAMBDA_RF = 1e-4
+    LAMBDA_RF = 0.
+
+    # Reaction wrench weight
+    W_rf = [1e-3, 1e-3, 1e-5, 1e-5, 1e-5, 4, 1e-3, 1e-3, 1e-5, 1e-5, 1e-5, 4]
 
     # B_TRQ_LIMIT = True
     B_TRQ_LIMIT = False
