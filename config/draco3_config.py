@@ -60,22 +60,31 @@ class WBCConfig(object):
     W_SWING_FOOT = 80.0
 
     # Task Gains
-    KP_COM = np.array([1000., 1000., 1000])
-    KD_COM = np.array([100., 100., 100.])
+    KP_COM = np.array([1000., 1000., 500])
+    KD_COM = np.array([100., 100., 50.])
 
-    KP_TORSO = np.array([1000., 1000., 1000])
-    KD_TORSO = np.array([100., 100., 100.])
+    # KP_TORSO = np.array([1000., 1000., 1000])
+    # KD_TORSO = np.array([100., 100., 100.])
+    KP_TORSO = np.array([500., 500., 500])
+    KD_TORSO = np.array([50., 50., 50.])
 
     # ['neck_pitch', 'l_shoulder_fe', 'l_shoulder_aa', 'l_shoulder_ie',
     # 'l_elbow_fe', 'l_wrist_ps', 'l_wrist_pitch', 'r_shoulder_fe',
     # 'r_shoulder_aa', 'r_shoulder_ie', 'r_elbow_fe', 'r_wrist_ps',
     # 'r_wrist_pitch'
     # ]
+    # KP_UPPER_BODY = np.array([
+    # 100., 100., 100., 100., 50., 40., 50., 100., 100., 100., 50., 40., 50.
+    # ])
+    # KD_UPPER_BODY = np.array(
+    # [20., 8., 8., 8., 3., 2., 3., 8., 8., 8., 3., 2., 3.])
+
     KP_UPPER_BODY = np.array([
-        100., 100., 100., 100., 50., 40., 50., 100., 100., 100., 50., 40., 50.
+        1000., 1000., 1000., 1000., 1000., 500., 500., 1000., 1000., 1000.,
+        1000., 500., 500.
     ])
     KD_UPPER_BODY = np.array(
-        [20., 8., 8., 8., 3., 2., 3., 8., 8., 8., 3., 2., 3.])
+        [100., 16., 16., 16., 6., 4., 6., 16., 16., 16., 6., 4., 6.])
 
     KP_FOOT_POS = np.array([500., 500., 500.])
     KD_FOOT_POS = np.array([50., 50., 50.])
@@ -101,7 +110,7 @@ class WalkingConfig(object):
     INIT_STAND_DUR = 0.5
     RF_Z_MAX_TIME = 0.1
 
-    COM_HEIGHT = 0.67  # m
+    COM_HEIGHT = 0.65  # m
     # SWING_HEIGHT = 0.03  # m
     SWING_HEIGHT = 0.20  # m
 

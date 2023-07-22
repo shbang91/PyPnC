@@ -28,7 +28,7 @@ int main() {
   NlpFormulation formulation;
 
   formulation.model_ = RobotModel(RobotModel::Draco3);
-  Eigen::Vector3d max_dev(0.3, 0.1, 0.3);
+  Eigen::Vector3d max_dev(0.5, 0.1, 0.45);
   Eigen::Vector3d min_dev(-0.3, -0.1, -0.1);
   formulation.model_.kinematic_model_->SetMaximumDeviationFromNominal(max_dev);
   formulation.model_.kinematic_model_->SetMinimumDeviationFromNominal(min_dev);
