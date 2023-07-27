@@ -34,7 +34,7 @@ class PnCConfig(object):
 
 
 class TowrPlusConfig(object):
-    TOWR_PLUS = True
+    TOWR_PLUS = False
     # SOLUTION_YAML = cwd + "/data/draco3_forward_walk.yaml"
     # SOLUTION_YAML = cwd + "/data/draco3_side_walk.yaml"
     # SOLUTION_YAML = cwd + "/data/draco3_turning.yaml"
@@ -94,11 +94,12 @@ class WBCConfig(object):
 
     # Regularization terms
     LAMBDA_Q_DDOT = 1e-8
-    # LAMBDA_RF = 1e-4
-    LAMBDA_RF = 0.
+    # LAMBDA_RF = 0.
+    LAMBDA_RF = 1e-7
 
     # Reaction wrench weight
-    W_rf = [1e-3, 1e-3, 1e-5, 1e-5, 1e-5, 4, 1e-3, 1e-3, 1e-5, 1e-5, 1e-5, 4]
+    # W_rf = [1e-3, 1e-3, 1e-5, 1e-5, 1e-5, 4, 1e-3, 1e-3, 1e-5, 1e-5, 1e-5, 4]
+    W_rf = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
     # B_TRQ_LIMIT = True
     B_TRQ_LIMIT = False
@@ -138,7 +139,7 @@ class WalkingConfig(object):
 
     # NOMINAL_FOOTWIDTH = 0.25
     NOMINAL_FOOTWIDTH = 0.202
-    NOMINAL_FORWARD_STEP = 0.40
+    NOMINAL_FORWARD_STEP = 0.43
     NOMINAL_BACKWARD_STEP = -0.40
     NOMINAL_TURN_RADIANS = np.pi / 10
     NOMINAL_STRAFE_DISTANCE = 0.4
