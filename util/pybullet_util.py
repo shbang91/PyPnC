@@ -111,9 +111,9 @@ def get_link_vel(robot, link_idx):
 
 
 def set_link_damping(robot, link_id, lin_damping, ang_damping):
-    for i in link_id:
+    for _, v in link_id.items():
         p.changeDynamics(robot,
-                         i,
+                         v,
                          linearDamping=lin_damping,
                          angularDamping=ang_damping)
 
