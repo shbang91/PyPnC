@@ -13,6 +13,8 @@ from pnc.robot_system.robot_system import RobotSystem
 from util import util
 from util import liegroup
 
+import copy
+
 
 class PinocchioRobotSystem(RobotSystem):
     """
@@ -289,3 +291,21 @@ class PinocchioRobotSystem(RobotSystem):
         ret[3:6] = jdot_qdot.linear
 
         return np.copy(ret)
+
+    @property
+    def get_joint_pos_limit(self):
+        return np.copy(self._joint_pos_limit)
+
+    @property
+    def get_joint_id(self):
+        return copy.deepcopy(self._joint_id)
+
+    @property
+    def get_Ag(self):
+        return np.copy(self._Ag)
+
+    def create_joint_pos_dict(self, joint_pos_vec):
+        joint_pos_dict = OrderedDict()
+        for k, v in self._joint_id.items():
+            joint_pos_dict[k] = joint_pos_vec[v]
+        return joint_pos_dict

@@ -41,6 +41,23 @@ def euler_rates_to_ang_vel(euler_ang, euler_rates):
     return np.copy(ret)
 
 
+def quat_rate_to_ang_vel(quat):
+    """
+    Parameters
+    ----------
+    quat (np.array): scalar last quaternion
+
+    Returns
+    -------
+    ret (np.array): \mathbb{R}^{3\times4} transformation matrix \omega = 2*E_Q*\dot{Q}
+
+    """
+    x, y, z, w = quat[0], quat[1], quat[2], quat[3]
+    ret = 2 * np.array([w, z, -y, -x, -z, w, x, -y, y, -x, w, -z]).reshape(
+        3, 4)
+    return np.copy(ret)
+
+
 def quat_to_rot(quat):
     """
     Parameters
@@ -217,6 +234,7 @@ def is_colliding_3d(start, goal, min, max, threshold, N):
 
 
 class GridLocation(object):
+
     def __init__(self, delta):
         """
         Parameters
