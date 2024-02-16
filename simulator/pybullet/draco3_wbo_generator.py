@@ -124,6 +124,25 @@ def sample_random_joint_config(robot_system):
     return output
 
 
+def mirror_sampled_joint(sampled_joint_pos):
+    """
+    Mirror sampled joint position about sagittal plane
+
+    Parameters:
+    - sampled_joint_pos (np.array)
+
+    Returns:
+    - mirrored joint pos (np.array).
+    """
+    mirrored_joint_pos = np.zeros(len(sampled_joint_pos))
+
+    mirrored_joint_pos[:13] = sampled_joint_pos[14:]
+    mirrored_joint_pos[13] = sampled_joint_pos[13]
+    mirrored_joint_pos[14:] = sampled_joint_pos[:13]
+
+    return np.copy(mirrored_joint_pos)
+
+
 def quat_misc_mat(quat):
     """
     Parameters
@@ -138,7 +157,8 @@ def quat_misc_mat(quat):
     quat_xyz = quat[0:3]
     quat_w = quat[3]
     ret = np.zeros((4, 3))
-    ret[0, :] = -1 / quat_w * quat_xyz
+    ret[0, :] = -1 / quat_w * quat_xyz if np.abs(quat_w) > 1e-8 else np.zeros(
+        3)
     ret[1:, :] = np.eye(3)
     return np.copy(ret)
 
@@ -181,7 +201,7 @@ if __name__ == "__main__":
     #multi-body dynamics library
     robot_sys = PinocchioRobotSystem(
         cwd + "/robot_model/draco3_old/draco3_old.urdf",
-        cwd + "/robot_model/draco3_old", False)
+        cwd + "/robot_model/draco3_old", True, False)
 
     ## rolling contact joint constraint
     c = pb.createConstraint(fixed_draco,
@@ -302,10 +322,15 @@ if __name__ == "__main__":
             # optimization
             objective = 0  # Start with an zero objective function
             # while (cost_val > convergence_threshold):
-            for j in range(5):
+            for j in range(3):
                 for i in range(N):
+                    ##########################################################
+                    ### sampled joint pos
+                    ##########################################################
                     # Sample random joint config
-                    joint_pos = sample_random_joint_config(robot_sys)
+                    joint_pos = sample_random_joint_config(
+                        robot_sys) if i % 2 == 0 else mirror_sampled_joint(
+                            joint_pos)
 
                     # Set sampled joint config in Pybullet
                     joint_pos_dict = robot_sys.create_joint_pos_dict(joint_pos)
@@ -343,17 +368,16 @@ if __name__ == "__main__":
                         nominal_base_joint_pos, nominal_base_joint_quat,
                         np.zeros(3), np.zeros(3), joint_pos_dict,
                         nominal_joint_vel, True)
+
                     Ag = robot_sys.get_Ag
-                    M_B = Ag[:3, 3:6]
-                    M_q = Ag[:3, 6:]
-                    A = np.linalg.inv(M_B) @ M_q
+                    A = Ag[:3, :]
 
                     # Calculate optimization objective function
                     # objective += norm_fro(A - T_Q @ theta_mat @ J_lambda)**2
 
                     # [alternative] Calculate optimization objective function(Vectorized objective function)
-                    objective += norm_2(
-                        DM(reshape(A, 3 * q.shape[0], 1)) -
+                    objective += norm_fro(
+                        DM(reshape(A, -1, 1)) -
                         DM(np.kron(J_lambda.T, T_Q)) @ theta_vec)**2
 
                 #optimization problem setup
@@ -374,6 +398,7 @@ if __name__ == "__main__":
                 cost_val = cost_opt
 
             # C code generation with the optimized theta
+            __import__('ipdb').set_trace()
             b_code_gen = True
             if b_code_gen:
                 # Define casadi function
@@ -390,7 +415,7 @@ if __name__ == "__main__":
                 print(Q_xyz_jac_func)
 
                 # Code generator
-                code_gen = CodeGenerator('draco_wbo_task.c',
+                code_gen = CodeGenerator('draco_wbo_task_helper.c',
                                          dict(with_header=True))
                 code_gen.add(Q_xyz_func)
                 code_gen.add(Q_xyz_jac_func)
