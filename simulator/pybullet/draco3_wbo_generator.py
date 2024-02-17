@@ -319,31 +319,31 @@ if __name__ == "__main__":
                 3 * num_basis_func
             )  #initialize theta decision variables to zero numpy array
 
+            # collect random joint config
+            sampled_joint_config_list = []
+            for i in range(N):
+                joint_pos = sample_random_joint_config(
+                    robot_sys) if i % 2 == 0 else mirror_sampled_joint(
+                        joint_pos)
+                sampled_joint_config_list.append(joint_pos)
+
+                # Set sampled joint config in Pybullet
+                joint_pos_dict = robot_sys.create_joint_pos_dict(joint_pos)
+                pybullet_util.set_config(fixed_draco, joint_id, link_id,
+                                         nominal_base_com_pos,
+                                         nominal_base_com_quat, joint_pos_dict)
+
+                # sanity check
+                # sensor_data = pybullet_util.get_sensor_data(
+                # fixed_draco, joint_id, link_id,
+                # pos_basejoint_to_basecom, rot_basejoint_to_basecom)
+
             # optimization
             objective = 0  # Start with an zero objective function
             # while (cost_val > convergence_threshold):
-            for j in range(3):
-                for i in range(N):
-                    ##########################################################
-                    ### sampled joint pos
-                    ##########################################################
-                    # Sample random joint config
-                    joint_pos = sample_random_joint_config(
-                        robot_sys) if i % 2 == 0 else mirror_sampled_joint(
-                            joint_pos)
-
-                    # Set sampled joint config in Pybullet
-                    joint_pos_dict = robot_sys.create_joint_pos_dict(joint_pos)
-                    pybullet_util.set_config(fixed_draco, joint_id, link_id,
-                                             nominal_base_com_pos,
-                                             nominal_base_com_quat,
-                                             joint_pos_dict)
-
-                    # sanity check
-                    # sensor_data = pybullet_util.get_sensor_data(
-                    # fixed_draco, joint_id, link_id,
-                    # pos_basejoint_to_basecom, rot_basejoint_to_basecom)
-
+            total_iter = 3
+            for j in range(total_iter):
+                for joint_pos in sampled_joint_config_list:
                     # Evaluate WBO Quaternion for the sampled joint config
                     quat_xyz_val = quat_xyz_func(theta,
                                                  joint_pos).full().flatten()
@@ -362,6 +362,7 @@ if __name__ == "__main__":
                     J_lambda = jacobian_func(joint_pos).full()
 
                     # Calculate A matrix
+                    joint_pos_dict = robot_sys.create_joint_pos_dict(joint_pos)
                     robot_sys.update_system(
                         nominal_base_com_pos, nominal_base_com_quat,
                         np.zeros(3), np.zeros(3),
@@ -381,15 +382,24 @@ if __name__ == "__main__":
                         DM(np.kron(J_lambda.T, T_Q)) @ theta_vec)**2
 
                 #optimization problem setup
+                # ipopt
                 nlp = {'x': theta_vec, 'f': 1 / N * objective}
                 solver = nlpsol('solver', 'ipopt', nlp)
                 print(solver)
-                result = solver(x0=theta)
+                result = solver()
+
+                # qpoases
+                # qp = {'x': theta_vec, 'f': 1 / N * objective}
+                # solver = qpsol('solver', 'qpoases', qp)
+                # print(solver)
+                # result = solver()
+
                 x_opt = result['x']
                 cost_opt = result['f']
                 print("=================================================")
                 print('x_opt: ', x_opt)
                 print('cost_opt: ', cost_opt)
+                print("=================================================")
 
                 # update solution
                 theta = x_opt
