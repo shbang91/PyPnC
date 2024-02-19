@@ -298,7 +298,7 @@ if __name__ == "__main__":
                 n_vars, max_degree)
 
             # Total number of random joint configs
-            N = 2000  # number of random joint config
+            N = 4000  # number of random joint config
 
             # Optimize preparation for WBO Quaternion approximation
             convergence_threshold = 0.01
@@ -341,7 +341,7 @@ if __name__ == "__main__":
             # optimization
             objective = 0  # Start with an zero objective function
             # while (cost_val > convergence_threshold):
-            total_iter = 3
+            total_iter = 20
             for j in range(total_iter):
                 for joint_pos in sampled_joint_config_list:
                     # Evaluate WBO Quaternion for the sampled joint config
@@ -407,8 +407,10 @@ if __name__ == "__main__":
                 # update cost
                 cost_val = cost_opt
 
+                # reset cost
+                objective = 0
+
             # C code generation with the optimized theta
-            __import__('ipdb').set_trace()
             b_code_gen = True
             if b_code_gen:
                 # Define casadi function
@@ -425,13 +427,16 @@ if __name__ == "__main__":
                 print(Q_xyz_jac_func)
 
                 # Code generator
-                code_gen = CodeGenerator('draco_wbo_task_helper.c',
-                                         dict(with_header=True))
+                code_gen = CodeGenerator('draco_wbo_task_helper.cpp', {
+                    'with_header': True,
+                    'cpp': True
+                })
                 code_gen.add(Q_xyz_func)
                 code_gen.add(Q_xyz_jac_func)
                 code_gen.generate()
                 print("C code generation done!")
                 print("=================================================")
+            __import__('ipdb').set_trace()
 
         elif pybullet_util.is_key_triggered(keys, '8'):
             print("-" * 80)
