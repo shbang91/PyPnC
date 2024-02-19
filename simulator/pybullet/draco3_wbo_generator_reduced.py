@@ -444,14 +444,14 @@ if __name__ == "__main__":
             print("Pressed 8: casadi optimization problem test")
 
             n_vars = 18  # number of draco joint including passive joints
-            max_degree = 2  # Maximum degree of the monomials basis function
+            max_degree = 3  # Maximum degree of the monomials basis function
 
             # Generate the monomial function and its Jacobian
             monomial_func, jacobian_func, num_basis_func, monomial_basis_symbolic, q = generate_multivariate_monomials(
                 n_vars, max_degree)
 
             # Total number of random joint configs
-            N = 2000  # number of random joint config
+            N = 100  # number of random joint config
 
             # Optimize preparation for WBO Quaternion approximation
             convergence_threshold = 0.01
@@ -548,8 +548,9 @@ if __name__ == "__main__":
                 objective = theta_vec.T @ Q @ theta_vec - 2 * p @ theta_vec + k
                 # print("objective func: ", objective)
 
+                opts = {"ipopt.hessian_approximation": "limited-memory"}
                 nlp = {'x': theta_vec, 'f': 1 / N * objective}
-                solver = nlpsol('solver', 'ipopt', nlp)
+                solver = nlpsol('solver', 'ipopt', nlp, opts)
                 print(solver)
                 result = solver(x0=theta)
 
