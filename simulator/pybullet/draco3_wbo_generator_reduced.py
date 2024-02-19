@@ -292,7 +292,7 @@ if __name__ == "__main__":
                 n_vars, max_degree)
 
             # Total number of random joint configs
-            N = 4000  # number of random joint config
+            N = 100  # number of random joint config
 
             # Optimize preparation for WBO Quaternion approximation
             convergence_threshold = 0.01
@@ -337,7 +337,7 @@ if __name__ == "__main__":
             # optimization
             objective = 0  # Start with an zero objective function
             # while (cost_val > convergence_threshold):
-            total_iter = 50
+            total_iter = 10
             for j in range(total_iter):
                 for joint_pos in sampled_joint_config_list:
                     # Evaluate WBO Quaternion for the sampled joint config
@@ -385,7 +385,7 @@ if __name__ == "__main__":
                 nlp = {'x': theta_vec, 'f': 1 / N * objective}
                 solver = nlpsol('solver', 'ipopt', nlp)
                 print(solver)
-                result = solver()
+                result = solver(x0=theta)
 
                 # qpoases
                 # qp = {'x': theta_vec, 'f': 1 / N * objective}
@@ -396,7 +396,7 @@ if __name__ == "__main__":
                 x_opt = result['x']
                 cost_opt = result['f']
                 print("=================================================")
-                print('%d iteration:', j)
+                print('%d iteration:' % j)
                 print('x_opt: ', x_opt)
                 print('cost_opt: ', cost_opt)
                 print("=================================================")
@@ -495,8 +495,8 @@ if __name__ == "__main__":
 
             # optimization
             objective = 0  # Start with an zero objective function
-            Q, p = 0, 0
-            total_iter = 5
+            Q, p, k = 0, 0, 0
+            total_iter = 10
             for j in range(total_iter):
                 for joint_pos in sampled_joint_config_list:
                     # Evaluate WBO Quaternion for the sampled joint config
@@ -539,40 +539,72 @@ if __name__ == "__main__":
                     B = DM(np.kron(J_lambda.T, T_Q))
                     Q += B.T @ B
                     p += DM(reshape(A, -1, 1)).T @ B
+                    k += DM(reshape(A, -1, 1)).T @ DM(reshape(A, -1, 1))
 
                 #optimization problem setup
                 print("=================================================")
                 print("Start optimization!")
 
-                #Linsol
-                s = CSparse(Q.sparsity())
-                s.init()
+                objective = theta_vec.T @ Q @ theta_vec - 2 * p @ theta_vec + k
+                # print("objective func: ", objective)
 
-                s.input(0).set(Q)
+                nlp = {'x': theta_vec, 'f': 1 / N * objective}
+                solver = nlpsol('solver', 'ipopt', nlp)
+                print(solver)
+                result = solver(x0=theta)
 
-                s.prepare()
-
-                s.input(1).set(p)
-
-                s.solve()
-
-                x_opt = s.output()
-
-                print("=================================================")
-                print('x_opt: ', x_opt)
-                print("=================================================")
-
-                # ipopt
-                # nlp = {'x': theta_vec, 'f': 1 / N * objective}
-                # solver = nlpsol('solver', 'ipopt', nlp)
+                # qpoases
+                # qp = {'x': theta_vec, 'f': 1 / N * objective}
+                # solver = qpsol('solver', 'qpoases', qp)
                 # print(solver)
                 # result = solver()
 
+                x_opt = result['x']
+                cost_opt = result['f']
+                print("=================================================")
+                print('%d iteration:' % j)
+                print('x_opt: ', x_opt)
+                print('cost_opt: ', cost_opt)
+                print("=================================================")
+
+                # update solution
                 theta = x_opt
+
+                # update cost
+                # cost_val = cost_opt
 
                 # reset optimization
                 objective = 0
-                Q, p = 0, 0
+                Q, p, k = 0, 0, 0
+
+            # C code generation with the optimized theta
+            b_code_gen = True
+            if b_code_gen:
+                # Define casadi function
+                theta[
+                    theta <
+                    1e-8] = 0  # discard the coefficients that are less than 1e-8
+                Q_xyz = reshape(theta, 3,
+                                num_basis_func) @ monomial_basis_symbolic
+                Q_xyz_func = Function('Q_xyz_func', [q], [Q_xyz])
+                Q_xyz_jac_func = Q_xyz_func.jacobian()
+                print("=================================================")
+                print("C code generation!")
+                print(Q_xyz_func)
+                print(Q_xyz_jac_func)
+
+                # Code generator
+                code_gen = CodeGenerator('draco_wbo_task_helper.cpp', {
+                    'with_header': True,
+                    'cpp': True
+                })
+                code_gen.add(Q_xyz_func)
+                code_gen.add(Q_xyz_jac_func)
+                code_gen.generate()
+                print("C code generation done!")
+                print("=================================================")
+
+                __import__('ipdb').set_trace()
 
         # Disable step simulation
         # pb.stepSimulation()
