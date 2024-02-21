@@ -118,7 +118,7 @@ def sample_random_joint_config(robot_system):
     return output
 
 
-def mirror_sampled_joint(sampled_joint_pos):
+def mirror_sampled_joint(sampled_joint_pos, robot_system):
     """
     Mirror sampled joint position about sagittal plane
 
@@ -128,10 +128,29 @@ def mirror_sampled_joint(sampled_joint_pos):
     Returns:
     - mirrored joint pos (np.array).
     """
+    robot_joint_id = robot_system.get_joint_id
+    l_hip_ie_idx = robot_joint_id["l_hip_ie"]
+    r_hip_ie_idx = robot_joint_id["r_hip_ie"]
+    l_hip_aa_idx = robot_joint_id["l_hip_aa"]
+    r_hip_aa_idx = robot_joint_id["r_hip_aa"]
+    l_shoulder_aa_idx = robot_joint_id["l_shoulder_aa"]
+    r_shoulder_aa_idx = robot_joint_id["r_shoulder_aa"]
+    l_shoulder_ie_idx = robot_joint_id["l_shoulder_ie"]
+    r_shoulder_ie_idx = robot_joint_id["r_shoulder_ie"]
+
+    sign_change_jidx_list = [
+        l_hip_ie_idx, r_hip_ie_idx, l_hip_aa_idx, r_hip_aa_idx,
+        l_shoulder_aa_idx, r_shoulder_aa_idx, l_shoulder_ie_idx,
+        r_shoulder_ie_idx
+    ]
+
     mirrored_joint_pos = np.zeros(len(sampled_joint_pos))
 
     mirrored_joint_pos[:9] = sampled_joint_pos[9:]
     mirrored_joint_pos[9:] = sampled_joint_pos[:9]
+
+    for jidx in sign_change_jidx_list:
+        mirrored_joint_pos[jidx] = -mirrored_joint_pos[jidx]
 
     return np.copy(mirrored_joint_pos)
 
@@ -185,6 +204,7 @@ if __name__ == "__main__":
         fixed_draco, SimConfig.INITIAL_BASE_JOINT_POS,
         SimConfig.INITIAL_BASE_JOINT_QUAT, SimConfig.PRINT_ROBOT_INFO)
 
+
     #robot initial config setting
     set_initial_config(fixed_draco, joint_id)
 
@@ -195,7 +215,7 @@ if __name__ == "__main__":
     #multi-body dynamics library
     robot_sys = PinocchioRobotSystem(
         cwd + "/robot_model/draco3_old/draco3_old_reduced.urdf",
-        cwd + "/robot_model/draco3_old", True, False)
+        cwd + "/robot_model/draco3_old", False, False)
 
     ## rolling contact joint constraint
     c = pb.createConstraint(fixed_draco,
@@ -292,7 +312,7 @@ if __name__ == "__main__":
                 n_vars, max_degree)
 
             # Total number of random joint configs
-            N = 100  # number of random joint config
+            N = 2000  # number of random joint config
 
             # Optimize preparation for WBO Quaternion approximation
             convergence_threshold = 0.01
@@ -318,7 +338,7 @@ if __name__ == "__main__":
             for i in range(N):
                 joint_pos = sample_random_joint_config(
                     robot_sys) if i % 2 == 0 else mirror_sampled_joint(
-                        joint_pos)
+                        joint_pos, robot_sys)
                 sampled_joint_config_list.append(joint_pos)
 
                 # Set sampled joint config in Pybullet
@@ -367,7 +387,9 @@ if __name__ == "__main__":
                         nominal_joint_vel, True)
 
                     Ag = robot_sys.get_Ag
-                    A = Ag[:3, :]
+                    M_B = Ag[:3, 3:6]
+                    M_q = Ag[:3, 6:]
+                    A = np.linalg.inv(M_B) @ M_q
 
                     # Calculate optimization objective function
                     # objective += norm_fro(A - T_Q @ theta_mat @ J_lambda)**2
@@ -414,9 +436,9 @@ if __name__ == "__main__":
             b_code_gen = True
             if b_code_gen:
                 # Define casadi function
-                theta[
-                    theta <
-                    1e-8] = 0  # discard the coefficients that are less than 1e-8
+                # theta[
+                # theta <
+                # 1e-8] = 0  # discard the coefficients that are less than 1e-8
                 Q_xyz = reshape(theta, 3,
                                 num_basis_func) @ monomial_basis_symbolic
                 Q_xyz_func = Function('Q_xyz_func', [q], [Q_xyz])
@@ -441,17 +463,17 @@ if __name__ == "__main__":
 
         elif pybullet_util.is_key_triggered(keys, '8'):
             print("-" * 80)
-            print("Pressed 8: casadi optimization problem test")
+            print("Pressed 8: Draco3 WBO optimization with BFGS approach")
 
             n_vars = 18  # number of draco joint including passive joints
-            max_degree = 3  # Maximum degree of the monomials basis function
+            max_degree = 2  # Maximum degree of the monomials basis function
 
             # Generate the monomial function and its Jacobian
             monomial_func, jacobian_func, num_basis_func, monomial_basis_symbolic, q = generate_multivariate_monomials(
                 n_vars, max_degree)
 
             # Total number of random joint configs
-            N = 100  # number of random joint config
+            N = 4000  # number of random joint config
 
             # Optimize preparation for WBO Quaternion approximation
             convergence_threshold = 0.01
@@ -477,7 +499,7 @@ if __name__ == "__main__":
             for i in range(N):
                 joint_pos = sample_random_joint_config(
                     robot_sys) if i % 2 == 0 else mirror_sampled_joint(
-                        joint_pos)
+                        joint_pos, robot_sys)
                 sampled_joint_config_list.append(joint_pos)
 
                 # Set sampled joint config in Pybullet
@@ -496,7 +518,7 @@ if __name__ == "__main__":
             # optimization
             objective = 0  # Start with an zero objective function
             Q, p, k = 0, 0, 0
-            total_iter = 10
+            total_iter = 20
             for j in range(total_iter):
                 for joint_pos in sampled_joint_config_list:
                     # Evaluate WBO Quaternion for the sampled joint config
@@ -526,7 +548,9 @@ if __name__ == "__main__":
                         nominal_joint_vel, True)
 
                     Ag = robot_sys.get_Ag
-                    A = Ag[:3, :]
+                    M_B = Ag[:3, 3:6]
+                    M_q = Ag[:3, 6:]
+                    A = np.linalg.inv(M_B) @ M_q
 
                     # Calculate optimization objective function
                     # objective += norm_fro(A - T_Q @ theta_mat @ J_lambda)**2
@@ -548,9 +572,11 @@ if __name__ == "__main__":
                 objective = theta_vec.T @ Q @ theta_vec - 2 * p @ theta_vec + k
                 # print("objective func: ", objective)
 
-                opts = {"ipopt.hessian_approximation": "limited-memory"}
+                # opts = {"ipopt.hessian_approximation": "limited-memory"}
+                opts = {'ipopt': {'tol': 1e-12}}
                 nlp = {'x': theta_vec, 'f': 1 / N * objective}
                 solver = nlpsol('solver', 'ipopt', nlp, opts)
+                # solver = nlpsol('solver', 'ipopt', nlp)
                 print(solver)
                 result = solver(x0=theta)
 
@@ -566,11 +592,12 @@ if __name__ == "__main__":
                 print('%d iteration:' % j)
                 print('x_opt: ', x_opt)
                 print('cost_opt: ', cost_opt)
-                print("=================================================")
 
                 # update solution
                 theta = x_opt
 
+                # print('theta: ', theta)
+                print("=================================================")
                 # update cost
                 # cost_val = cost_opt
 
@@ -582,15 +609,18 @@ if __name__ == "__main__":
             b_code_gen = True
             if b_code_gen:
                 # Define casadi function
-                theta[
-                    theta <
-                    1e-8] = 0  # discard the coefficients that are less than 1e-8
+                # theta[
+                # theta <
+                # 1e-8] = 0  # discard the coefficients that are less than 1e-8
+                print("=================================================")
+                print("C code generation!")
+                # print("optimized theta: ", theta)
+                # print("reshaped theta: ", reshape(theta, 3, -1))
+
                 Q_xyz = reshape(theta, 3,
                                 num_basis_func) @ monomial_basis_symbolic
                 Q_xyz_func = Function('Q_xyz_func', [q], [Q_xyz])
                 Q_xyz_jac_func = Q_xyz_func.jacobian()
-                print("=================================================")
-                print("C code generation!")
                 print(Q_xyz_func)
                 print(Q_xyz_jac_func)
 

@@ -124,7 +124,7 @@ def sample_random_joint_config(robot_system):
     return output
 
 
-def mirror_sampled_joint(sampled_joint_pos):
+def mirror_sampled_joint(sampled_joint_pos, robot_sys):
     """
     Mirror sampled joint position about sagittal plane
 
@@ -139,6 +139,30 @@ def mirror_sampled_joint(sampled_joint_pos):
     mirrored_joint_pos[:13] = sampled_joint_pos[14:]
     mirrored_joint_pos[13] = sampled_joint_pos[13]
     mirrored_joint_pos[14:] = sampled_joint_pos[:13]
+
+    robot_joint_id = robot_system.get_joint_id
+    l_hip_ie_idx = robot_joint_id["l_hip_ie"]
+    r_hip_ie_idx = robot_joint_id["r_hip_ie"]
+    l_hip_aa_idx = robot_joint_id["l_hip_aa"]
+    r_hip_aa_idx = robot_joint_id["r_hip_aa"]
+    l_ankle_ie_idx = robot_joint_id["l_ankle_ie"]
+    r_ankle_ie_idx = robot_joint_id["r_ankle_ie"]
+
+    l_shoulder_aa_idx = robot_joint_id["l_shoulder_aa"]
+    r_shoulder_aa_idx = robot_joint_id["r_shoulder_aa"]
+    l_shoulder_ie_idx = robot_joint_id["l_shoulder_ie"]
+    r_shoulder_ie_idx = robot_joint_id["r_shoulder_ie"]
+    l_wrist_ps_idx = robot_joint_id["l_wrist_ps"]
+    r_wrist_ps_idx = robot_joint_id["r_wrist_ps"]
+
+    sign_change_jidx_list = [
+        l_hip_ie_idx, r_hip_ie_idx, l_hip_aa_idx, r_hip_aa_idx, l_ankle_ie_idx,
+        r_ankle_ie_idx, l_shoulder_aa_idx, r_shoulder_aa_idx,
+        l_shoulder_ie_idx, r_shoulder_ie_idx, l_wrist_ps_idx, r_wrist_ps_idx
+    ]
+
+    for jidx in sign_change_jidx_list:
+        mirrored_joint_pos[jidx] = -mirrored_joint_pos[jidx]
 
     return np.copy(mirrored_joint_pos)
 
@@ -180,7 +204,7 @@ if __name__ == "__main__":
 
     ## robot spawn & initial kinematics and dynamics setting
     pb.configureDebugVisualizer(pb.COV_ENABLE_RENDERING, 0)
-    fixed_draco = pb.loadURDF(cwd + "/robot_model/draco3_old/draco3_old.urdf",
+    draco_robot = pb.loadURDF(cwd + "/robot_model/draco3_old/draco3_old.urdf",
                               SimConfig.INITIAL_BASE_JOINT_POS,
                               SimConfig.INITIAL_BASE_JOINT_QUAT,
                               useFixedBase=False)
@@ -188,25 +212,25 @@ if __name__ == "__main__":
     pb.configureDebugVisualizer(pb.COV_ENABLE_RENDERING, 1)
 
     nq, nv, na, joint_id, link_id, pos_basejoint_to_basecom, rot_basejoint_to_basecom = pybullet_util.get_robot_config(
-        fixed_draco, SimConfig.INITIAL_BASE_JOINT_POS,
+        draco_robot, SimConfig.INITIAL_BASE_JOINT_POS,
         SimConfig.INITIAL_BASE_JOINT_QUAT, SimConfig.PRINT_ROBOT_INFO)
 
     #robot initial config setting
-    set_initial_config(fixed_draco, joint_id)
+    set_initial_config(draco_robot, joint_id)
 
     #robot joint and link dynamics setting
-    pybullet_util.set_joint_friction(fixed_draco, joint_id, 0)
-    pybullet_util.set_link_damping(fixed_draco, link_id, 0., 0.)
+    pybullet_util.set_joint_friction(draco_robot, joint_id, 0)
+    pybullet_util.set_link_damping(draco_robot, link_id, 0., 0.)
 
     #multi-body dynamics library
     robot_sys = PinocchioRobotSystem(
         cwd + "/robot_model/draco3_old/draco3_old.urdf",
-        cwd + "/robot_model/draco3_old", True, False)
+        cwd + "/robot_model/draco3_old", False, False)
 
     ## rolling contact joint constraint
-    c = pb.createConstraint(fixed_draco,
+    c = pb.createConstraint(draco_robot,
                             link_id['l_knee_fe_lp'],
-                            fixed_draco,
+                            draco_robot,
                             link_id['l_knee_fe_ld'],
                             jointType=pb.JOINT_GEAR,
                             jointAxis=[0, 1, 0],
@@ -214,9 +238,9 @@ if __name__ == "__main__":
                             childFramePosition=[0, 0, 0])
     pb.changeConstraint(c, gearRatio=-1, maxForce=500, erp=2)
 
-    c = pb.createConstraint(fixed_draco,
+    c = pb.createConstraint(draco_robot,
                             link_id['r_knee_fe_lp'],
-                            fixed_draco,
+                            draco_robot,
                             link_id['r_knee_fe_ld'],
                             jointType=pb.JOINT_GEAR,
                             jointAxis=[0, 1, 0],
@@ -230,11 +254,11 @@ if __name__ == "__main__":
 
     ##get_sensor_data
     pybullet_nominal_sensor_data_dict = pybullet_util.get_sensor_data(
-        fixed_draco, joint_id, link_id, pos_basejoint_to_basecom,
+        draco_robot, joint_id, link_id, pos_basejoint_to_basecom,
         rot_basejoint_to_basecom)
-    nominal_lf_iso = pybullet_util.get_link_iso(fixed_draco,
+    nominal_lf_iso = pybullet_util.get_link_iso(draco_robot,
                                                 link_id['l_foot_contact'])
-    nominal_rf_iso = pybullet_util.get_link_iso(fixed_draco,
+    nominal_rf_iso = pybullet_util.get_link_iso(draco_robot,
                                                 link_id['r_foot_contact'])
     nominal_base_com_pos = np.copy(
         pybullet_nominal_sensor_data_dict['base_com_pos'])
@@ -324,24 +348,25 @@ if __name__ == "__main__":
             for i in range(N):
                 joint_pos = sample_random_joint_config(
                     robot_sys) if i % 2 == 0 else mirror_sampled_joint(
-                        joint_pos)
+                        joint_pos, robot_sys)
                 sampled_joint_config_list.append(joint_pos)
 
                 # Set sampled joint config in Pybullet
                 joint_pos_dict = robot_sys.create_joint_pos_dict(joint_pos)
-                pybullet_util.set_config(fixed_draco, joint_id, link_id,
+                pybullet_util.set_config(draco_robot, joint_id, link_id,
                                          nominal_base_com_pos,
                                          nominal_base_com_quat, joint_pos_dict)
 
                 # sanity check
                 # sensor_data = pybullet_util.get_sensor_data(
-                # fixed_draco, joint_id, link_id,
+                # draco_robot, joint_id, link_id,
                 # pos_basejoint_to_basecom, rot_basejoint_to_basecom)
 
             # optimization
             objective = 0  # Start with an zero objective function
-            # while (cost_val > convergence_threshold):
+            Q, p, k = 0, 0, 0
             total_iter = 20
+            # while (cost_val > convergence_threshold):
             for j in range(total_iter):
                 for joint_pos in sampled_joint_config_list:
                     # Evaluate WBO Quaternion for the sampled joint config
@@ -371,22 +396,33 @@ if __name__ == "__main__":
                         nominal_joint_vel, True)
 
                     Ag = robot_sys.get_Ag
-                    A = Ag[:3, :]
+                    M_B = Ag[:3, 3:6]
+                    M_q = Ag[:3, 6:]
+                    A = np.linalg.inv(M_B) @ M_q
 
                     # Calculate optimization objective function
                     # objective += norm_fro(A - T_Q @ theta_mat @ J_lambda)**2
 
                     # [alternative] Calculate optimization objective function(Vectorized objective function)
-                    objective += norm_fro(
-                        DM(reshape(A, -1, 1)) -
-                        DM(np.kron(J_lambda.T, T_Q)) @ theta_vec)**2
+                    # objective += norm_fro(
+                    # DM(reshape(A, -1, 1)) -
+                    # DM(np.kron(J_lambda.T, T_Q)) @ theta_vec)**2
+
+                    B = DM(np.kron(J_lambda.T, T_Q))
+                    Q += B.T @ B
+                    p += DM(reshape(A, -1, 1)).T @ B
+                    k += DM(reshape(A, -1, 1)).T @ DM(reshape(A, -1, 1))
 
                 #optimization problem setup
+                print("=================================================")
+                print("Start optimization!")
+                objective = theta_vec.T @ Q @ theta_vec - 2 * p @ theta_vec + k
+
                 # ipopt
                 nlp = {'x': theta_vec, 'f': 1 / N * objective}
                 solver = nlpsol('solver', 'ipopt', nlp)
                 print(solver)
-                result = solver()
+                result = solver(x0=theta)
 
                 # qpoases
                 # qp = {'x': theta_vec, 'f': 1 / N * objective}
@@ -397,6 +433,7 @@ if __name__ == "__main__":
                 x_opt = result['x']
                 cost_opt = result['f']
                 print("=================================================")
+                print('%d iteration:' % j)
                 print('x_opt: ', x_opt)
                 print('cost_opt: ', cost_opt)
                 print("=================================================")
@@ -409,14 +446,15 @@ if __name__ == "__main__":
 
                 # reset cost
                 objective = 0
+                Q, p, k = 0, 0, 0
 
             # C code generation with the optimized theta
             b_code_gen = True
             if b_code_gen:
                 # Define casadi function
-                theta[
-                    theta <
-                    1e-8] = 0  # discard the coefficients that are less than 1e-8
+                # theta[
+                # theta <
+                # 1e-8] = 0  # discard the coefficients that are less than 1e-8
                 Q_xyz = reshape(theta, 3,
                                 num_basis_func) @ monomial_basis_symbolic
                 Q_xyz_func = Function('Q_xyz_func', [q], [Q_xyz])
