@@ -204,7 +204,6 @@ if __name__ == "__main__":
         fixed_draco, SimConfig.INITIAL_BASE_JOINT_POS,
         SimConfig.INITIAL_BASE_JOINT_QUAT, SimConfig.PRINT_ROBOT_INFO)
 
-
     #robot initial config setting
     set_initial_config(fixed_draco, joint_id)
 
@@ -312,7 +311,7 @@ if __name__ == "__main__":
                 n_vars, max_degree)
 
             # Total number of random joint configs
-            N = 2000  # number of random joint config
+            N = 5000  # number of random joint config
 
             # Optimize preparation for WBO Quaternion approximation
             convergence_threshold = 0.01
@@ -473,7 +472,7 @@ if __name__ == "__main__":
                 n_vars, max_degree)
 
             # Total number of random joint configs
-            N = 4000  # number of random joint config
+            N = 2000  # number of random joint config
 
             # Optimize preparation for WBO Quaternion approximation
             convergence_threshold = 0.01
@@ -494,9 +493,9 @@ if __name__ == "__main__":
                 3 * num_basis_func
             )  #initialize theta decision variables to zero numpy array
 
-            # collect random joint config
+            # collect random joint config (mirrored in sagittal plane)
             sampled_joint_config_list = []
-            for i in range(N):
+            for i in range(int(N / 2)):
                 joint_pos = sample_random_joint_config(
                     robot_sys) if i % 2 == 0 else mirror_sampled_joint(
                         joint_pos, robot_sys)
@@ -510,6 +509,17 @@ if __name__ == "__main__":
 
                 time.sleep(dt)
 
+            # collect random sample
+            for i in range(int(N / 2)):
+                joint_pos = sample_random_joint_config(robot_sys)
+                sampled_joint_config_list.append(joint_pos)
+
+                # Set sampled joint config in Pybullet
+                joint_pos_dict = robot_sys.create_joint_pos_dict(joint_pos)
+                pybullet_util.set_config(fixed_draco, joint_id, link_id,
+                                         nominal_base_com_pos,
+                                         nominal_base_com_quat, joint_pos_dict)
+                time.sleep(dt)
                 # sanity check
                 # sensor_data = pybullet_util.get_sensor_data(
                 # fixed_draco, joint_id, link_id,
@@ -518,8 +528,8 @@ if __name__ == "__main__":
             # optimization
             objective = 0  # Start with an zero objective function
             Q, p, k = 0, 0, 0
-            total_iter = 20
-            for j in range(total_iter):
+            total_iter = 10
+            for iter in range(total_iter):
                 for joint_pos in sampled_joint_config_list:
                     # Evaluate WBO Quaternion for the sampled joint config
                     quat_xyz_val = quat_xyz_func(theta,
@@ -573,10 +583,10 @@ if __name__ == "__main__":
                 # print("objective func: ", objective)
 
                 # opts = {"ipopt.hessian_approximation": "limited-memory"}
-                opts = {'ipopt': {'tol': 1e-12}}
+                # opts = {'ipopt': {'tol': 1e-12}}
                 nlp = {'x': theta_vec, 'f': 1 / N * objective}
-                solver = nlpsol('solver', 'ipopt', nlp, opts)
-                # solver = nlpsol('solver', 'ipopt', nlp)
+                # solver = nlpsol('solver', 'ipopt', nlp, opts)
+                solver = nlpsol('solver', 'ipopt', nlp)
                 print(solver)
                 result = solver(x0=theta)
 
@@ -589,7 +599,7 @@ if __name__ == "__main__":
                 x_opt = result['x']
                 cost_opt = result['f']
                 print("=================================================")
-                print('%d iteration:' % j)
+                print('%d iteration:' % iter)
                 print('x_opt: ', x_opt)
                 print('cost_opt: ', cost_opt)
 
@@ -605,37 +615,34 @@ if __name__ == "__main__":
                 objective = 0
                 Q, p, k = 0, 0, 0
 
-            # C code generation with the optimized theta
-            b_code_gen = True
-            if b_code_gen:
-                # Define casadi function
-                # theta[
-                # theta <
-                # 1e-8] = 0  # discard the coefficients that are less than 1e-8
-                print("=================================================")
-                print("C code generation!")
-                # print("optimized theta: ", theta)
-                # print("reshaped theta: ", reshape(theta, 3, -1))
+                if (iter + 1) % 10 == 0:
+                    # Define casadi function
+                    # theta[
+                    # theta <
+                    # 1e-8] = 0  # discard the coefficients that are less than 1e-8
+                    print("=================================================")
+                    print("C code generation!")
+                    Q_xyz = reshape(theta, 3,
+                                    num_basis_func) @ monomial_basis_symbolic
+                    Q_xyz_func = Function('Q_xyz_func', [q], [Q_xyz])
+                    Q_xyz_jac_func = Q_xyz_func.jacobian()
+                    print(Q_xyz_func)
+                    print(Q_xyz_jac_func)
 
-                Q_xyz = reshape(theta, 3,
-                                num_basis_func) @ monomial_basis_symbolic
-                Q_xyz_func = Function('Q_xyz_func', [q], [Q_xyz])
-                Q_xyz_jac_func = Q_xyz_func.jacobian()
-                print(Q_xyz_func)
-                print(Q_xyz_jac_func)
+                    # Code generator
+                    file_name = 'draco_wbo_task_helper_' + str(iter +
+                                                               1) + '.cpp'
+                    code_gen = CodeGenerator(file_name, {
+                        'with_header': True,
+                        'cpp': True
+                    })
+                    code_gen.add(Q_xyz_func)
+                    code_gen.add(Q_xyz_jac_func)
+                    code_gen.generate()
+                    print("C code generation done!")
+                    print("=================================================")
 
-                # Code generator
-                code_gen = CodeGenerator('draco_wbo_task_helper.cpp', {
-                    'with_header': True,
-                    'cpp': True
-                })
-                code_gen.add(Q_xyz_func)
-                code_gen.add(Q_xyz_jac_func)
-                code_gen.generate()
-                print("C code generation done!")
-                print("=================================================")
-
-                __import__('ipdb').set_trace()
+            __import__('ipdb').set_trace()
 
         # Disable step simulation
         # pb.stepSimulation()
