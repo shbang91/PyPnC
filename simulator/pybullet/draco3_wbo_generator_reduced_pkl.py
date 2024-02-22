@@ -297,232 +297,178 @@ if __name__ == "__main__":
     nominal_joint_vel = copy.deepcopy(
         pybullet_nominal_sensor_data_dict['joint_vel'])
 
-    while (True):
+    ## optimization
 
-        # Get Keyboard Event
-        keys = pb.getKeyboardEvents()
+    n_vars = 18  # number of draco joint including passive joints
+    max_degree = 2  # Maximum degree of the monomials basis function
 
-        if pybullet_util.is_key_triggered(keys, '1'):
-            print("-" * 80)
-            print(
-                "Pressed 1: test multivariate monomials and its Jacobian function"
-            )
-            # Example usage
-            n_vars = 18  # Number of variables, e.g., x, y, z
-            max_degree = 2  # Maximum degree of the monomials
+    # Generate the monomial function and its Jacobian
+    monomial_func, jacobian_func, num_basis_func, monomial_basis_symbolic, q = generate_multivariate_monomials(
+        n_vars, max_degree)
 
-            # Generate the monomial function
-            monomial_func, Jacobian_func, size, monomial_basis_symbolic, q = generate_multivariate_monomials(
-                n_vars, max_degree)
+    # Optimize preparation for WBO Quaternion approximation
+    convergence_threshold = 0.01
+    cost_val = 1
+    num_elements = 3 * num_basis_func  # Total number of elements in the decision variable matrix
 
-            # Print out the monomial function vec & its Jacobian
-            print("monomial function: ", monomial_func)
-            print("Jacobian_func: ", Jacobian_func)
-            print("the number of monomial basis function: ", size)
-            print("monomial basis symbolic function: ",
-                  monomial_basis_symbolic)
-            print("symbolic basis: ", q)
+    # Define the decision variable as a vector
+    theta_vec = MX.sym('theta_vec', num_elements)
 
-            # Example input vector
-            x_input = DM(np.ones(n_vars))
+    # Reshape the decision variable vector into a matrix for ease of use
+    theta_mat = reshape(theta_vec, 3, num_basis_func)
 
-            # Evaluate the monomial function
-            monomials_output = monomial_func(x_input)
-            print("monomials_output: ", monomials_output)
-            print("monomials_output in numpy: ", np.array(monomials_output))
-            Jacobian_output = Jacobian_func(x_input)
-            print("Jacobian_output: ", Jacobian_output)
-            print("Jacobian_output in numpy: ", np.array(Jacobian_output))
-            __import__('ipdb').set_trace()
+    # Quaternion XYZ approximate with basis functions
+    quat_xyz = theta_mat @ monomial_basis_symbolic
+    quat_xyz_func = Function('quat_xyz_func', [theta_vec, q], [quat_xyz])
+    theta = np.zeros(
+        3 * num_basis_func
+    )  #initialize theta decision variables to zero numpy array
 
-        elif pybullet_util.is_key_triggered(keys, '8'):
-            print("-" * 80)
-            print(
-                "Pressed 8: Draco3 WBO optimization with one step motions data"
-            )
+    # collect random joint config
+    # sampled_joint_config_list = []
+    # for i in range(N):
+    # joint_pos = sample_random_joint_config(
+    # robot_sys) if i % 2 == 0 else mirror_sampled_joint(
+    # joint_pos, robot_sys)
+    # sampled_joint_config_list.append(joint_pos)
 
-            n_vars = 18  # number of draco joint including passive joints
-            max_degree = 2  # Maximum degree of the monomials basis function
+    # Set sampled joint config in Pybullet
+    # joint_pos_dict = robot_sys.create_joint_pos_dict(joint_pos)
+    # pybullet_util.set_config(fixed_draco, joint_id, link_id,
+    # nominal_base_com_pos,
+    # nominal_base_com_quat, joint_pos_dict)
 
-            # Generate the monomial function and its Jacobian
-            monomial_func, jacobian_func, num_basis_func, monomial_basis_symbolic, q = generate_multivariate_monomials(
-                n_vars, max_degree)
+    # time.sleep(dt)
 
-            # Optimize preparation for WBO Quaternion approximation
-            convergence_threshold = 0.01
-            cost_val = 1
-            num_elements = 3 * num_basis_func  # Total number of elements in the decision variable matrix
+    # sanity check
+    # sensor_data = pybullet_util.get_sensor_data(
+    # fixed_draco, joint_id, link_id,
+    # pos_basejoint_to_basecom, rot_basejoint_to_basecom)
 
-            # Define the decision variable as a vector
-            theta_vec = MX.sym('theta_vec', num_elements)
+    # TODO: function that outputs list of base config and reduced joint config
+    #   1. read pkl file (input)
+    #   2. sort base config + reduced joint config
+    sampled_base_config_list, sampled_joint_config_list, NUM_SAMPLES = sample_config_from_one_step_motions(
+        cwd + '/data/draco3_crbi_fwd_step_joints.pkl')
 
-            # Reshape the decision variable vector into a matrix for ease of use
-            theta_mat = reshape(theta_vec, 3, num_basis_func)
+    # optimization
+    objective = 0  # Start with an zero objective function
+    Q, p, k = 0, 0, 0
+    total_iter = 10
+    for j in range(total_iter):
+        for base_config, joint_pos in zip(sampled_base_config_list,
+                                          sampled_joint_config_list):
+            # Evaluate WBO Quaternion for the sampled joint config
+            quat_xyz_val = quat_xyz_func(theta, joint_pos).full().flatten()
+            w = np.sqrt(max(0, 1 - quat_xyz_val.T.dot(quat_xyz_val)))
+            quat = np.array(
+                [quat_xyz_val[0], quat_xyz_val[1], quat_xyz_val[2], w])
+            normalized_quat = quat / np.linalg.norm(quat)
 
-            # Quaternion XYZ approximate with basis functions
-            quat_xyz = theta_mat @ monomial_basis_symbolic
-            quat_xyz_func = Function('quat_xyz_func', [theta_vec, q],
-                                     [quat_xyz])
-            theta = np.zeros(
-                3 * num_basis_func
-            )  #initialize theta decision variables to zero numpy array
+            # Calculate T_Q
+            R_Q = util.quat_to_rot(normalized_quat)
+            E_Q = util.quat_rate_to_ang_vel(normalized_quat)
+            K_Q = quat_misc_mat(normalized_quat)
+            T_Q = R_Q @ E_Q @ K_Q
 
-            # collect random joint config
-            # sampled_joint_config_list = []
-            # for i in range(N):
-            # joint_pos = sample_random_joint_config(
-            # robot_sys) if i % 2 == 0 else mirror_sampled_joint(
-            # joint_pos, robot_sys)
-            # sampled_joint_config_list.append(joint_pos)
+            # Calculate Jac_lambda
+            J_lambda = jacobian_func(joint_pos).full()
 
-            # Set sampled joint config in Pybullet
-            # joint_pos_dict = robot_sys.create_joint_pos_dict(joint_pos)
-            # pybullet_util.set_config(fixed_draco, joint_id, link_id,
-            # nominal_base_com_pos,
-            # nominal_base_com_quat, joint_pos_dict)
+            # Calculate A matrix
+            joint_pos_dict = robot_sys.create_joint_pos_dict(joint_pos)
+            base_joint_pos = base_config[:3]
+            base_joint_quat = base_config[3:7]
+            robot_sys.update_system(nominal_base_com_pos,
+                                    nominal_base_com_quat, np.zeros(3),
+                                    np.zeros(3), base_joint_pos,
+                                    base_joint_quat, np.zeros(3), np.zeros(3),
+                                    joint_pos_dict, nominal_joint_vel, True)
 
-            # time.sleep(dt)
+            Ag = robot_sys.get_Ag
+            M_B = Ag[:3, 3:6]
+            M_q = Ag[:3, 6:]
+            A = np.linalg.inv(M_B) @ M_q
 
-            # sanity check
-            # sensor_data = pybullet_util.get_sensor_data(
-            # fixed_draco, joint_id, link_id,
-            # pos_basejoint_to_basecom, rot_basejoint_to_basecom)
+            # Calculate optimization objective function
+            # objective += norm_fro(A - T_Q @ theta_mat @ J_lambda)**2
 
-            # TODO: function that outputs list of base config and reduced joint config
-            #   1. read pkl file (input)
-            #   2. sort base config + reduced joint config
-            # sampled_base_config_list, sampled_joint_config_list, NUM_SAMPLES = sample_config_from_one_step_motions(
-            # cwd + '/data/draco3_crbi_fwd_step_joints.pkl')
+            # [alternative] Calculate optimization objective function(Vectorized objective function)
+            # objective += sumsqr(
+            # DM(reshape(A, -1, 1)) -
+            # DM(np.kron(J_lambda.T, T_Q)) @ theta_vec)
 
-            __import__('ipdb').set_trace()
-            # optimization
-            objective = 0  # Start with an zero objective function
-            Q, p, k = 0, 0, 0
-            total_iter = 10
-            for j in range(total_iter):
-                for base_config, joint_pos in zip(sampled_base_config_list,
-                                                  sampled_joint_config_list):
-                    # Evaluate WBO Quaternion for the sampled joint config
-                    quat_xyz_val = quat_xyz_func(theta,
-                                                 joint_pos).full().flatten()
-                    w = np.sqrt(max(0, 1 - quat_xyz_val.T.dot(quat_xyz_val)))
-                    quat = np.array(
-                        [quat_xyz_val[0], quat_xyz_val[1], quat_xyz_val[2], w])
-                    normalized_quat = quat / np.linalg.norm(quat)
+            B = DM(np.kron(J_lambda.T, T_Q))
+            Q += B.T @ B
+            p += DM(reshape(A, -1, 1)).T @ B
+            k += DM(reshape(A, -1, 1)).T @ DM(reshape(A, -1, 1))
 
-                    # Calculate T_Q
-                    R_Q = util.quat_to_rot(normalized_quat)
-                    E_Q = util.quat_rate_to_ang_vel(normalized_quat)
-                    K_Q = quat_misc_mat(normalized_quat)
-                    T_Q = R_Q @ E_Q @ K_Q
+        #optimization problem setup
+        print("=================================================")
+        print("Start optimization!")
 
-                    # Calculate Jac_lambda
-                    J_lambda = jacobian_func(joint_pos).full()
+        objective = theta_vec.T @ Q @ theta_vec - 2 * p @ theta_vec + k
+        # print("objective func: ", objective)
 
-                    # Calculate A matrix
-                    joint_pos_dict = robot_sys.create_joint_pos_dict(joint_pos)
-                    base_joint_pos = base_config[:3]
-                    base_joint_quat = base_config[3:7]
-                    robot_sys.update_system(nominal_base_com_pos,
-                                            nominal_base_com_quat, np.zeros(3),
-                                            np.zeros(3), base_joint_pos,
-                                            base_joint_quat, np.zeros(3),
-                                            np.zeros(3), joint_pos_dict,
-                                            nominal_joint_vel, True)
+        # opts = {"ipopt.hessian_approximation": "limited-memory"}
+        # opts = {'ipopt': {'tol': 1e-12}}
+        nlp = {'x': theta_vec, 'f': 1 / NUM_SAMPLES * objective}
+        # solver = nlpsol('solver', 'ipopt', nlp, opts)
+        solver = nlpsol('solver', 'ipopt', nlp)
+        print(solver)
+        result = solver(x0=theta)
 
-                    Ag = robot_sys.get_Ag
-                    M_B = Ag[:3, 3:6]
-                    M_q = Ag[:3, 6:]
-                    A = np.linalg.inv(M_B) @ M_q
+        # qpoases
+        # qp = {'x': theta_vec, 'f': 1 / N * objective}
+        # solver = qpsol('solver', 'qpoases', qp)
+        # print(solver)
+        # result = solver()
 
-                    # Calculate optimization objective function
-                    # objective += norm_fro(A - T_Q @ theta_mat @ J_lambda)**2
+        x_opt = result['x']
+        cost_opt = result['f']
+        print("=================================================")
+        print('%d iteration:' % j)
+        print('x_opt: ', x_opt)
+        print('cost_opt: ', cost_opt)
 
-                    # [alternative] Calculate optimization objective function(Vectorized objective function)
-                    # objective += sumsqr(
-                    # DM(reshape(A, -1, 1)) -
-                    # DM(np.kron(J_lambda.T, T_Q)) @ theta_vec)
+        # update solution
+        theta = x_opt
 
-                    B = DM(np.kron(J_lambda.T, T_Q))
-                    Q += B.T @ B
-                    p += DM(reshape(A, -1, 1)).T @ B
-                    k += DM(reshape(A, -1, 1)).T @ DM(reshape(A, -1, 1))
+        # print('theta: ', theta)
+        print("=================================================")
+        # update cost
+        # cost_val = cost_opt
 
-                #optimization problem setup
-                print("=================================================")
-                print("Start optimization!")
+        # reset optimization
+        objective = 0
+        Q, p, k = 0, 0, 0
 
-                objective = theta_vec.T @ Q @ theta_vec - 2 * p @ theta_vec + k
-                # print("objective func: ", objective)
+    # C code generation with the optimized theta
+    b_code_gen = True
+    if b_code_gen:
+        # Define casadi function
+        # theta[
+        # theta <
+        # 1e-8] = 0  # discard the coefficients that are less than 1e-8
+        print("=================================================")
+        print("C code generation!")
+        # print("optimized theta: ", theta)
+        # print("reshaped theta: ", reshape(theta, 3, -1))
 
-                # opts = {"ipopt.hessian_approximation": "limited-memory"}
-                # opts = {'ipopt': {'tol': 1e-12}}
-                nlp = {'x': theta_vec, 'f': 1 / NUM_SAMPLES * objective}
-                # solver = nlpsol('solver', 'ipopt', nlp, opts)
-                solver = nlpsol('solver', 'ipopt', nlp)
-                print(solver)
-                result = solver(x0=theta)
+        Q_xyz = reshape(theta, 3, num_basis_func) @ monomial_basis_symbolic
+        Q_xyz_func = Function('Q_xyz_func', [q], [Q_xyz])
+        Q_xyz_jac_func = Q_xyz_func.jacobian()
+        print(Q_xyz_func)
+        print(Q_xyz_jac_func)
 
-                # qpoases
-                # qp = {'x': theta_vec, 'f': 1 / N * objective}
-                # solver = qpsol('solver', 'qpoases', qp)
-                # print(solver)
-                # result = solver()
+        # Code generator
+        code_gen = CodeGenerator('draco_wbo_task_helper.cpp', {
+            'with_header': True,
+            'cpp': True
+        })
+        code_gen.add(Q_xyz_func)
+        code_gen.add(Q_xyz_jac_func)
+        code_gen.generate()
+        print("C code generation done!")
+        print("=================================================")
 
-                x_opt = result['x']
-                cost_opt = result['f']
-                print("=================================================")
-                print('%d iteration:' % j)
-                print('x_opt: ', x_opt)
-                print('cost_opt: ', cost_opt)
-
-                # update solution
-                theta = x_opt
-
-                # print('theta: ', theta)
-                print("=================================================")
-                # update cost
-                # cost_val = cost_opt
-
-                # reset optimization
-                objective = 0
-                Q, p, k = 0, 0, 0
-
-            # C code generation with the optimized theta
-            b_code_gen = True
-            if b_code_gen:
-                # Define casadi function
-                # theta[
-                # theta <
-                # 1e-8] = 0  # discard the coefficients that are less than 1e-8
-                print("=================================================")
-                print("C code generation!")
-                # print("optimized theta: ", theta)
-                # print("reshaped theta: ", reshape(theta, 3, -1))
-
-                Q_xyz = reshape(theta, 3,
-                                num_basis_func) @ monomial_basis_symbolic
-                Q_xyz_func = Function('Q_xyz_func', [q], [Q_xyz])
-                Q_xyz_jac_func = Q_xyz_func.jacobian()
-                print(Q_xyz_func)
-                print(Q_xyz_jac_func)
-
-                # Code generator
-                code_gen = CodeGenerator('draco_wbo_task_helper.cpp', {
-                    'with_header': True,
-                    'cpp': True
-                })
-                code_gen.add(Q_xyz_func)
-                code_gen.add(Q_xyz_jac_func)
-                code_gen.generate()
-                print("C code generation done!")
-                print("=================================================")
-
-                __import__('ipdb').set_trace()
-
-        # Disable step simulation
-        # pb.stepSimulation()
-
-        time.sleep(dt)
-        t += dt
-        count += 1
+        __import__('ipdb').set_trace()
