@@ -33,7 +33,7 @@ void CompositeRigidBodyInertia::_fill_double_array(const Eigen::MatrixXd &mat,
                                                    double **x) {
   for (int row = 0; row < mat.rows(); ++row) {
     for (int col = 0; col < mat.cols(); ++col) {
-      x[col][row] = mat(col, row);
+      x[row][col] = mat(row, col);
     }
   }
 }
