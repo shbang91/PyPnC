@@ -124,7 +124,7 @@ def sample_random_joint_config(robot_system):
     return output
 
 
-def mirror_sampled_joint(sampled_joint_pos, robot_sys):
+def mirror_sampled_joint(sampled_joint_pos, robot_system):
     """
     Mirror sampled joint position about sagittal plane
 
@@ -365,7 +365,7 @@ if __name__ == "__main__":
             # optimization
             objective = 0  # Start with an zero objective function
             Q, p, k = 0, 0, 0
-            total_iter = 20
+            total_iter = 10
             # while (cost_val > convergence_threshold):
             for j in range(total_iter):
                 for joint_pos in sampled_joint_config_list:
